@@ -1,49 +1,65 @@
 use std::error::Error;
 use std::fmt;
-use std::ops::Add;
+use std::ops;
+
+#[derive(Debug, Clone, PartialEq)]
+struct Dimensions {
+    rows: usize,
+    cols: usize
+}
 
 #[derive(Debug, Clone, PartialEq)]
 struct Matrix<T> {
-    rows: usize,
-    cols: usize,
+    dims: Dimensions,
     data: Vec<T>
 }
 
-#[derive(Debug, Clone)]
-pub enum DimensionError {
-    Addition {
-        lhs: (usize, usize),
-        rhs: (usize, usize)
-    },
-    Multiplication {
-        lhs: (usize, usize),
-        rhs: (usize, usize)
-    }
+pub enum MatrixOperation {
+    Addition,
+    Subtraction,
+    Multiplication,
+    Division,
+    Hadamard
 }
 
-impl fmt::Display for DimensionError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            DimensionError::Addition {lhs, rhs} => write!(
-                f,
-                "Cannot add matrices of different dimensions ({} by {} and {} by {})",
-                lhs.0, lhs.1, rhs.0, rhs.1
-            ),
-            DimensionError::Multiplication {lhs, rhs} => write!(
-                f,
-                "Cannot multply matrices of dimensions ({}x{}) and ({}x{}): \
-                left columns ({}) must equal right rows ({})",
-                lhs.0, lhs.1, rhs.0, rhs.1,
-                lhs.1, rhs.0
-            )
-        }
-    }
+// while this seems redundant, it is to allow cleaner future designs with matrix errors.
+pub enum MatrixError {
+    Shape(ShapeError)
+    // IndexError { index: Dimensions, dims: Dimensions },
+    // NotSquare { dims: Dimensions },
+    // Singular { dims: Dimensions },
 }
+
+pub enum ShapeError {
+    DimensionError { op: MatrixOperation, lhs: Dimensions, rhs: Dimensions }
+}
+
+
+
+// impl fmt::Display for MatrixError {
+//     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+//         match self {
+//             MatrixOperation::Addition => write!(
+//                 f,
+//                 "Cannot add matrices of dimensions ({}x{}) and ({}x{}): \
+//                 dimensions must be equal",
+//                 self.lhs.0, self.lhs.1, self.rhs.0, self.rhs.1
+//             ),
+//             MatrixOperation::Multiplication => write!(
+//                 f,
+//                 "Cannot multply matrices of dimensions ({}x{}) and ({}x{}): \
+//                 left columns ({}) must equal right rows ({})",
+//                 self.lhs.0, self.lhs.1, self.rhs.0, self.rhs.1,
+//                 self.lhs.1, self.rhs.0
+//             )
+//         }
+//     }
+// }
 
 impl Error for DimensionError {}
 
 impl<T> Matrix<T> 
-where T: Copy + Add<Output=T>
+where T: Copy + ops::Add<Output=T>
 {
     fn add(&self, other: &Self) -> Result<Self, DimensionError> {
         if self.rows != other.rows || self.cols != other.cols {
@@ -61,8 +77,8 @@ where T: Copy + Add<Output=T>
     }
 }
 
-impl<T> Add<&Matrix<T>> for &Matrix<T>
-    where T: Copy + Add<Output = T>
+impl<T> ops::Add<&Matrix<T>> for &Matrix<T>
+    where T: Copy + ops::Add<Output = T>
 {
     type Output = Matrix<T>;
 
