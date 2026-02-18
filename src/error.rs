@@ -1,12 +1,11 @@
-use crate::dimensions::Dimensions;
 use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum ShapeError {
-    #[error("Cannot {} matrices of shapes {} and {}", .op, .lhs, .rhs)]
-    Dimension { op: &'static str, lhs: Dimensions, rhs: Dimensions },
-    #[error("Dimensions of {} (total {}) cannot contain {} objects", .expected, .expected.size(), .len)]
-    Reshape { expected: Dimensions, len: usize }
+    #[error("Cannot {} matrices of shapes {}x{} and {}x{}", .op, .l_rows, .l_cols, .r_rows, .r_cols)]
+    Dimension { op: &'static str, l_rows: usize, l_cols: usize, r_rows: usize, r_cols: usize },
+    #[error("Dimensions of {}x{} (total {}) cannot contain {} objects", .exp_rows, .exp_cols, .exp_rows * .exp_cols, .len)]
+    Reshape { exp_rows: usize, exp_cols: usize, len: usize }
 }
 
 #[derive(Error, Debug)]
