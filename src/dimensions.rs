@@ -2,8 +2,8 @@ use std::fmt;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Dimensions {
-    rows: usize,
-    cols: usize
+    pub rows: usize,
+    pub cols: usize
 }
 
 impl Dimensions {

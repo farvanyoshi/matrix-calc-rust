@@ -1,5 +1,5 @@
 mod dimensions;
-pub mod error;
+mod error;
 pub mod matrix;
 
 pub use error::MatrixError;
