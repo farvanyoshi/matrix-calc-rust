@@ -1,6 +1,9 @@
 use crate::error;
 use num_traits::{Zero, One};
 
+// ? Implement Vectors and Scalars?
+// ? Use Scalars to implement right-associativity?
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct Matrix<T> {
     pub rows: usize, 
@@ -26,17 +29,17 @@ impl<T> Matrix<T> {
 
     pub fn try_get(&self, row: usize, col: usize) -> Result<&T, error::MatrixError> {
         self.check_index(row, col)?;
-        Ok(&self.data[row * self.rows + col])
+        Ok(&self.data[row * self.cols + col])
     }
 
     pub fn try_get_mut(&mut self, row: usize, col: usize) -> Result<&T, error::MatrixError> {
         self.check_index(row, col)?;
-        Ok(&mut self.data[row * self.rows + col])
+        Ok(&mut self.data[row * self.cols + col])
     }
 
     pub fn get(&self, row: usize, col: usize) -> Option<&T> {
         if row < self.rows && col < self.cols {
-            Some(&self.data[row * self.rows + col])
+            Some(&self.data[row * self.cols + col])
         } else {
             None
         }
@@ -44,7 +47,7 @@ impl<T> Matrix<T> {
 
     pub fn get_mut(&mut self, row: usize, col: usize) -> Option<&mut T> {
         if row < self.rows && col < self.cols {
-            Some(&mut self.data[row * self.rows + col])
+            Some(&mut self.data[row * self.cols + col])
         } else {
             None
         }
@@ -67,7 +70,9 @@ impl<T> Matrix<T> {
         Ok(Matrix { rows, cols, data })
         
     }
+}
 
+impl<T> Matrix<T> {
     pub fn try_map<U>(&self, f: impl Fn(&T) -> Result<U, error::MatrixError>) 
     -> Result<Matrix<U>, error::MatrixError> {
         let mut data = Vec::with_capacity(self.data.len());
@@ -82,8 +87,8 @@ impl<T> Matrix<T> {
         self.try_map(|x| Ok(f(x))).unwrap()
     }
 
-    pub fn try_zip_map<U>(&self, other: &Self, f: impl Fn(&T, &T) -> Result<U, error::MatrixError>)
-    -> Result<Matrix<U>, error::MatrixError> {
+    pub fn try_zip_map<U, R>(&self, other: &Matrix<U>, f: impl Fn(&T, &U) -> Result<R, error::MatrixError>)
+    -> Result<Matrix<R>, error::MatrixError> {
         if (self.rows != other.rows) && (self.cols != other.cols) {
             return Err(error::ShapeError::Dimension {
                 op: "do element-wise operations for",
@@ -102,8 +107,8 @@ impl<T> Matrix<T> {
         Ok(Matrix { rows: self.rows, cols: self.cols, data })
     }
 
-    pub fn zip_map<U>(&self, other: &Self, f: impl Fn(&T, &T) -> U)
-    -> Matrix<U> {
+    pub fn zip_map<U, R>(&self, other: &Matrix<U>, f: impl Fn(&T, &U) -> R)
+    -> Matrix<R> {
         self.try_zip_map(other, |a, b| Ok(f(a, b))).unwrap_or_else(|e| panic!("{e}"))
     }
 }

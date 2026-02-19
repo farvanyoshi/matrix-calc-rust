@@ -1,35 +1,113 @@
-use crate::error;
+use crate::error::{MatrixError, ShapeError, NumericError};
 use crate::matrix::base::Matrix;
-use std::ops;
-use num_traits::Zero;
+use std::ops::{Add, Sub, Mul, Div, Neg, AddAssign, Index, IndexMut};
+use num_traits::{Zero, Num};
 
-impl<T> Matrix<T>
-where T: Copy
-{
-    pub fn neg(&self) -> Matrix<<T as ops::Neg>::Output> where T: ops::Neg {
+type AddResult<T, U> = <T as Add<U>>::Output;
+type SubResult<T, U> = <T as Sub<U>>::Output;
+type MulResult<T, U> = <T as Mul<U>>::Output;
+type DivResult<T, U> = <T as Div<U>>::Output;
+
+impl<T: Copy> Matrix<T> {
+    pub fn neg<U: Copy>(&self) -> Matrix<<T as Neg>::Output> where T: Neg {
         self.map(|x| x.neg())
     }
 
-    pub fn try_add(&self, other: &Self) -> Result<Matrix<<T as ops::Add>::Output>, error::MatrixError> where T: ops::Add {
+    pub fn try_add<U: Copy>(&self, other: &Matrix<U>) -> Result<Matrix<AddResult<T, U>>, MatrixError> where T: Add<U> {
         self.try_zip_map(other, |a, b| Ok(*a + *b))
     }
 
-    pub fn add(&self, other: &Self) -> Matrix<<T as ops::Add>::Output> where T: ops::Add {
+    pub fn add<U: Copy>(&self, other: &Matrix<U>) -> Matrix<AddResult<T, U>> where T: Add<U> {
         self.try_add(other).unwrap_or_else(|e| panic!("{e}"))
     }
 
-    pub fn try_sub(&self, other: &Self) -> Result<Matrix<<T as ops::Sub>::Output>, error::MatrixError> where T: ops::Sub {
+    pub fn try_sub<U: Copy>(&self, other: &Matrix<U>) -> Result<Matrix<SubResult<T, U>>, MatrixError> where T: Sub<U> {
         self.try_zip_map(other, |a, b| Ok(*a - *b))
     }
 
-    pub fn sub(&self, other: &Self) -> Matrix<<T as ops::Sub>::Output> where T: ops::Sub {
+    pub fn sub<U: Copy>(&self, other: &Matrix<U>) -> Matrix<SubResult<T, U>> where T: Sub<U> {
         self.try_sub(other).unwrap_or_else(|e| panic!("{e}"))
     }
 
-    pub fn matmul(&self, other: &Self) -> Result<Self, error::MatrixError>
-    where T: ops::AddAssign + ops::Mul<Output=T> + Zero {
+    pub fn try_hadamard<U>(&self, other: &Matrix<U>) -> Result<Matrix<MulResult<T, U>>, MatrixError>
+    where
+        T: Mul<U>,
+        U: Copy
+    {
+        self.try_zip_map(other, |a, b| Ok(*a * *b))
+    }
+
+    pub fn hadamard<U>(&self, other: &Matrix<U>) -> Matrix<MulResult<T, U>>
+    where
+        T: Mul<U>,
+        U: Copy
+    {
+        self.try_hadamard(other).unwrap_or_else(|e| panic!("{e}"))
+    }
+
+    pub fn try_el_div<U>(&self, other: &Matrix<U>) -> Result<Matrix<DivResult<T, U>>, MatrixError>
+    where
+        T: Div<U>,
+        U: Copy + Zero
+    {
+        self.try_zip_map(other, |a, b| {
+            if b.is_zero() {
+                Err(NumericError::DivideByZero.into())
+            } else {
+                Ok(*a / *b)
+            }
+        })
+    }
+
+    pub fn el_div<U>(&self, other: &Matrix<U>) -> Matrix<DivResult<T, U>>
+    where
+        T: Div<U>,
+        U: Copy + Zero
+    {
+        self.try_el_div(other).unwrap_or_else(|e| panic!("{e}"))
+    }
+
+    pub fn try_scalar_mul<S>(&self, scalar: S) -> Result<Matrix<MulResult<T, S>>, MatrixError>
+    where
+        T: Mul<S>,
+        S: Copy
+    {
+        self.try_map(|x| Ok(*x * scalar))
+    }
+
+    pub fn scalar_mul<S>(&self, scalar: S) -> Matrix<MulResult<T, S>> 
+    where
+        T: Mul<S>,
+        S: Copy
+    {
+        self.try_scalar_mul(scalar).unwrap_or_else(|e| panic!("{e}"))
+    }
+
+    pub fn try_scalar_div<S>(&self, scalar: S) -> Result<Matrix<DivResult<T, S>>, MatrixError>
+    where
+        T: Div<S>,
+        S: Copy
+    {
+        self.try_map(|x| Ok(*x / scalar))
+    }
+
+    pub fn scalar_div<S>(&self, scalar: S) -> Matrix<DivResult<T, S>> 
+    where
+        T: Div<S>,
+        S: Copy
+    {
+        self.try_scalar_div(scalar).unwrap_or_else(|e| panic!("{e}"))
+    }
+
+    pub fn try_matmul<U>(&self, other: &Matrix<U>) -> Result<Matrix<MulResult<T, U>>, MatrixError>
+    where
+        T: Mul<U>,
+        U: Copy,
+        MulResult<T, U>: Zero + Copy + AddAssign
+    
+    {
         if self.cols != other.rows {
-            return Err(error::ShapeError::Dimension {
+            return Err(ShapeError::Dimension {
                 op: "matrix multiply",
                 l_rows: self.rows,
                 l_cols: self.cols,
@@ -42,7 +120,7 @@ where T: Copy
         let cols = other.cols;
         let shared = self.cols;
         
-        let mut data = vec![T::zero(); rows * cols];
+        let mut data = vec![MulResult::<T, U>::zero(); rows * cols];
 
         for i in 0..rows {
             for k in 0..shared {
@@ -56,52 +134,63 @@ where T: Copy
         Ok(Matrix { rows, cols, data })
     }
 
-    pub fn hadamard(&self, other: &Self) -> Self where T: ops::Mul<Output=T> {
-        self.zip_map(other, |a, b| *a * *b)
-    }
-
-    pub fn el_div(&self, other: &Self) -> Result<Self, error::MatrixError> where T: ops::Div<Output=T> + PartialEq + Zero {
-        self.try_zip_map(other, |a, b| {
-            if *b == T::zero() {
-                Err(error::NumericError::DivideByZero.into())
-            } else {
-                Ok(*a / *b)
-            }
-        })
+    pub fn matmul<U>(&self, other: &Matrix<U>) -> Matrix<MulResult<T, U>>
+    where
+        T: Mul<U>,
+        U: Copy,
+        MulResult<T, U>: Zero + Copy + AddAssign
+    {
+        self.try_matmul(other).unwrap_or_else(|e| panic!("{e}"))
     }
 }
     
-impl<T> ops::Add<&Matrix<T>> for &Matrix<T>
-    where T: Copy + ops::Add<Output = T>
+impl<T, U> Add<&Matrix<U>> for &Matrix<T>
+    where T: Copy + Add<U>, U: Copy
 {
-    type Output = Matrix<T>;
+    type Output = Matrix<AddResult<T, U>>;
 
-    fn add(self, rhs: &Matrix<T>) -> Self::Output {
+    fn add(self, rhs: &Matrix<U>) -> Self::Output {
         self.add(rhs)
     }
 }
 
-impl<T> ops::Sub<&Matrix<T>> for &Matrix<T>
-    where T: Copy + ops::Sub<Output = T>
+impl<T, U> Sub<&Matrix<U>> for &Matrix<T>
+    where T: Copy + Sub<U>, U: Copy
 {
-    type Output = Matrix<T>;
+    type Output = Matrix<SubResult<T, U>>;
 
-    fn sub(self, rhs: &Matrix<T>) -> Self::Output {
+    fn sub(self, rhs: &Matrix<U>) -> Self::Output {
         self.sub(rhs)
     }
 }
 
-impl<T> ops::Mul<&Matrix<T>> for &Matrix<T>
-    where T: Copy + ops::Mul<Output = T> + ops::AddAssign + Zero
+impl<T, S> Mul<S> for &Matrix<T>
+where
+    T: Copy + Mul<S>,
+    S: Copy + Num,
+    MulResult<T, S>: Copy
 {
-    type Output = Matrix<T>;
+    type Output = Matrix<MulResult<T, S>>;
 
-    fn mul(self, rhs: &Matrix<T>) -> Self::Output {
-        self.matmul(rhs).unwrap()
+    fn mul(self, rhs: S) -> Self::Output {
+        self.map(|x| *x * rhs)
     }
 }
 
-impl<T> ops::Index<(usize, usize)> for Matrix<T> {
+impl<T, U> Mul<&Matrix<U>> for &Matrix<T>
+where
+    T: Copy + Mul<U>,
+    U: Copy,
+    MulResult<T, U>: Zero + Copy + AddAssign
+{
+    type Output = Matrix<MulResult<T, U>>;
+
+    fn mul(self, rhs: &Matrix<U>) -> Self::Output {
+        self.matmul(rhs)
+    }
+}
+
+impl<T> Index<(usize, usize)> for Matrix<T> {
     type Output = T;
 
     fn index(&self, (row, col): (usize, usize)) -> &Self::Output {
@@ -109,7 +198,7 @@ impl<T> ops::Index<(usize, usize)> for Matrix<T> {
     }
 }
 
-impl<T> ops::IndexMut<(usize, usize)> for Matrix<T> {
+impl<T> IndexMut<(usize, usize)> for Matrix<T> {
     fn index_mut(&mut self, (row, col): (usize, usize)) -> &mut Self::Output {
         self.get_mut(row, col).unwrap()
     }
