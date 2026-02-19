@@ -1,4 +1,3 @@
-use crate::dimensions::Dimensions;
 use crate::error;
 use crate::matrix::base::Matrix;
 use std::ops;
@@ -29,29 +28,32 @@ where T: Copy
 
     pub fn matmul(&self, other: &Self) -> Result<Self, error::MatrixError>
     where T: ops::AddAssign + ops::Mul<Output=T> + Zero {
-        if self.dims.cols != other.dims.rows {
+        if self.cols != other.rows {
             return Err(error::ShapeError::Dimension {
                 op: "matrix multiply",
-                lhs: self.dims,
-                rhs: other.dims
+                l_rows: self.rows,
+                l_cols: self.cols,
+                r_rows: other.rows,
+                r_cols: other.cols
             }.into());
         }
         
-        let dims = Dimensions { rows: self.dims.rows, cols: other.dims.cols };
-        let shared = self.dims.cols;
+        let rows = self.rows;
+        let cols = other.cols;
+        let shared = self.cols;
         
-        let mut data = vec![T::zero(); dims.size()];
+        let mut data = vec![T::zero(); rows * cols];
 
-        for i in 0..dims.rows {
+        for i in 0..rows {
             for k in 0..shared {
                 let a = self.data[i * shared + k];
-                for j in 0..dims.cols {
-                    data[i * dims.cols + j] += a * other.data[k * dims.cols + j];
+                for j in 0..cols {
+                    data[i * cols + j] += a * other.data[k * cols + j];
                 }
             }
         }
 
-        Ok(Matrix { dims, data })
+        Ok(Matrix { rows, cols, data })
     }
 
     pub fn hadamard(&self, other: &Self) -> Self where T: ops::Mul<Output=T> {
@@ -108,9 +110,7 @@ impl<T> ops::Index<(usize, usize)> for Matrix<T> {
 }
 
 impl<T> ops::IndexMut<(usize, usize)> for Matrix<T> {
-    type Output = T;
-
-    fn index_mut(&mut self, index: (usize, usize)) -> &mut Self::Output {
+    fn index_mut(&mut self, (row, col): (usize, usize)) -> &mut Self::Output {
         self.get_mut(row, col).unwrap()
     }
 }

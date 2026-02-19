@@ -5,6 +5,8 @@ use num_traits::{Zero, One};
 pub struct Matrix<T> {
     pub rows: usize, 
     pub cols: usize,
+    // ! The following line will likely never happen:
+    // TODO: convert to TensorStorage<T> in the future
     pub data: Vec<T>
 }
 
@@ -21,9 +23,6 @@ impl<T> Matrix<T> {
             (_, false) => Err(error::IndexError::ColOOB { col, cols: self.cols }.into())
         }
     }
-
-// TODO: implement matrix multiplication (outer product)
-// TODO: convert to TensorStorage<T> in the future
 
     pub fn try_get(&self, row: usize, col: usize) -> Result<&T, error::MatrixError> {
         self.check_index(row, col)?;
@@ -43,9 +42,9 @@ impl<T> Matrix<T> {
         }
     }
 
-    pub fn get_mut(&mut self, row: usize, col: usize) -> Option<&T> {
+    pub fn get_mut(&mut self, row: usize, col: usize) -> Option<&mut T> {
         if row < self.rows && col < self.cols {
-            Some(&self.data[row * self.rows + col])
+            Some(&mut self.data[row * self.rows + col])
         } else {
             None
         }
