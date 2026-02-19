@@ -1,8 +1,6 @@
-use crate::error;
+use crate::error::MathError;
+use crate::matrix::error;
 use num_traits::{Zero, One};
-
-// ? Implement Vectors and Scalars?
-// ? Use Scalars to implement right-associativity?
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Matrix<T> {
@@ -18,11 +16,11 @@ impl<T> Matrix<T> {
         self.rows * self.cols
     }
 
-    fn check_index(&self, row: usize, col: usize) -> Result<(), error::MatrixError> {
+    fn check_index(&self, row: usize, col: usize) -> Result<(), MathError> {
         match (row < self.rows, col < self.cols) {
             (true, true) => Ok(()),
             (false, false) => Err(error::IndexError::FullOOB { row, col, rows: self.rows, cols: self.cols }.into()),
-            (false, _) => Err(error::IndexError::RowOOB { row, rows: self.rows }.into()),
+            (false, _) => Err(error::IndexError::RowOOB { row, rows: self.rows }.into().into()),
             (_, false) => Err(error::IndexError::ColOOB { col, cols: self.cols }.into())
         }
     }
