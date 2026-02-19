@@ -9,6 +9,27 @@ pub enum ShapeError {
 }
 
 #[derive(Error, Debug)]
+pub enum IndexError {
+    #[error("{} out of bounds for matrix with {} rows", .row, .rows)]
+    RowOOB {
+        row: usize,
+        rows: usize
+    },
+    #[error("{} out of bounds for matrix with {} columns", .col, .cols)]
+    ColOOB {
+        col: usize,
+        cols: usize
+    },
+    #[error("{} and {} out of bounds for matrix of dimensions {}x{}", .row, .col, .rows, .cols)]
+    FullOOB {
+        row: usize,
+        col: usize,
+        rows: usize,
+        cols: usize
+    }
+}
+
+#[derive(Error, Debug)]
 pub enum NumericError {
     #[error("Cannot divide by zero!")]
     DivideByZero
@@ -17,10 +38,12 @@ pub enum NumericError {
 #[derive(Error, Debug)]
 pub enum MatrixError {
     #[error(transparent)]
-    Shape(#[from] ShapeError),
+    ShapeErr(#[from] ShapeError),
+    #[error(transparent)]
+    IdxErr(#[from] IndexError),
     // IndexError { index: Dimensions, dims: Dimensions },
     // NotSquare { dims: Dimensions },
     // Singular { dims: Dimensions },
     #[error(transparent)]
-    Numeric(#[from] NumericError)
+    NumErr(#[from] NumericError)
 }

@@ -98,3 +98,19 @@ impl<T> ops::Mul<&Matrix<T>> for &Matrix<T>
         self.matmul(rhs).unwrap()
     }
 }
+
+impl<T> ops::Index<(usize, usize)> for Matrix<T> {
+    type Output = T;
+
+    fn index(&self, (row, col): (usize, usize)) -> &Self::Output {
+        self.get(row, col).unwrap()
+    }
+}
+
+impl<T> ops::IndexMut<(usize, usize)> for Matrix<T> {
+    type Output = T;
+
+    fn index_mut(&mut self, index: (usize, usize)) -> &mut Self::Output {
+        self.get_mut(row, col).unwrap()
+    }
+}

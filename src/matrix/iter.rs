@@ -1,5 +1,5 @@
 use crate::matrix::base::Matrix;
-use std::{iter::IntoIterator};
+use std::iter::IntoIterator;
 
 impl<T> IntoIterator for Matrix<T> {
     type Item = T;
@@ -21,22 +21,12 @@ impl<'a, T> IntoIterator for &'a Matrix<T> {
 
 impl<T> Matrix<T> {
     pub fn iter_rows(&'_ self) -> std::slice::Chunks<'_, T> {
-        self.data.chunks(self.dims.cols)
+        self.data.chunks(self.cols)
     }
-}
 
-struct ColumnIter<T> {
-    matrix: Matrix<T>,
-    col_index: usize,
-    next_row: usize
-}
+    pub fn iter_cols(&self, col: usize) -> impl ExactSizeIterator<Item = &T> + DoubleEndedIterator {
+        assert!(col < self.cols);
 
-impl<T> Iterator for ColumnIter<T> {
-    type Item = T;
-
-    fn next(&self) -> Option<Self::Item> {
-        if self.next_row < self.matrix.dims.rows {
-            let index = self.next_row * self.matrix.dims.cols + self.col_index
-        }
+        self.data.iter().skip(col).step_by(self.cols)
     }
 }
