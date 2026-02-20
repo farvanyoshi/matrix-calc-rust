@@ -1,7 +1,5 @@
-mod vector;
-mod matrix;
-mod tensor;
-mod error;
+pub mod matrix;
+pub mod error;
 
 pub use matrix::base::Matrix;
-// use "error"
+pub use error::MatrixError;
