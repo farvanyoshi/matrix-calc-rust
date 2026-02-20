@@ -1,5 +1,5 @@
 use crate::error::{MatrixError, ShapeError, NumericError};
-use crate::matrix::base::Matrix;
+use crate::matrix::Matrix;
 use std::ops::{Add, Sub, Mul, Div, Neg, AddAssign, Index, IndexMut};
 use num_traits::{Zero, Num};
 
