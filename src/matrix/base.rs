@@ -5,8 +5,6 @@ use num_traits::{Zero, One};
 pub struct Matrix<T> {
     pub rows: usize, 
     pub cols: usize,
-    // ! The following line will likely never happen:
-    // TODO: convert to TensorStorage<T> in the future
     pub data: Vec<T>
 }
 
