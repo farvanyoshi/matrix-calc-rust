@@ -10,11 +10,11 @@ type DivResult<T, U> = <T as Div<U>>::Output;
 
 impl<T: Copy> Matrix<T> {
     pub fn neg<U: Copy>(&self) -> Matrix<<T as Neg>::Output> where T: Neg {
-        self.map(|x| x.neg())
+        Matrix::from_vec(self.into_iter().map(|x| x.neg()).collect(), self.rows, self.cols).unwrap()
     }
 
     pub fn try_add<U: Copy>(&self, other: &Matrix<U>) -> Result<Matrix<AddResult<T, U>>, MatrixError> where T: Add<U> {
-        self.try_zip_map(other, |a, b| Ok(*a + *b))
+        self.try_zip_map(other, |a, b| *a + *b)
     }
 
     pub fn add<U: Copy>(&self, other: &Matrix<U>) -> Matrix<AddResult<T, U>> where T: Add<U> {
@@ -22,7 +22,7 @@ impl<T: Copy> Matrix<T> {
     }
 
     pub fn try_sub<U: Copy>(&self, other: &Matrix<U>) -> Result<Matrix<SubResult<T, U>>, MatrixError> where T: Sub<U> {
-        self.try_zip_map(other, |a, b| Ok(*a - *b))
+        self.try_zip_map(other, |a, b| *a - *b)
     }
 
     pub fn sub<U: Copy>(&self, other: &Matrix<U>) -> Matrix<SubResult<T, U>> where T: Sub<U> {
@@ -34,7 +34,7 @@ impl<T: Copy> Matrix<T> {
         T: Mul<U>,
         U: Copy
     {
-        self.try_zip_map(other, |a, b| Ok(*a * *b))
+        self.try_zip_map(other, |a, b| *a * *b)
     }
 
     pub fn hadamard<U>(&self, other: &Matrix<U>) -> Matrix<MulResult<T, U>>
@@ -50,13 +50,12 @@ impl<T: Copy> Matrix<T> {
         T: Div<U>,
         U: Copy + Zero
     {
-        self.try_zip_map(other, |a, b| {
-            if b.is_zero() {
-                Err(NumericError::DivideByZero.into())
-            } else {
-                Ok(*a / *b)
+        for x in other {
+            if x.is_zero() {
+                return Err(NumericError::DivideByZero.into())
             }
-        })
+        }
+        self.try_zip_map(other, |a, b| *a / *b )
     }
 
     pub fn el_div<U>(&self, other: &Matrix<U>) -> Matrix<DivResult<T, U>>
@@ -72,7 +71,7 @@ impl<T: Copy> Matrix<T> {
         T: Mul<S>,
         S: Copy
     {
-        self.try_map(|x| Ok(*x * scalar))
+        Matrix::from_vec(self.into_iter().map(|x| *x * scalar).collect(), self.rows, self.cols)
     }
 
     pub fn scalar_mul<S>(&self, scalar: S) -> Matrix<MulResult<T, S>> 
@@ -88,7 +87,7 @@ impl<T: Copy> Matrix<T> {
         T: Div<S>,
         S: Copy
     {
-        self.try_map(|x| Ok(*x / scalar))
+        Matrix::from_vec(self.into_iter().map(|x| *x / scalar).collect(), self.rows, self.cols)
     }
 
     pub fn scalar_div<S>(&self, scalar: S) -> Matrix<DivResult<T, S>> 
@@ -173,7 +172,7 @@ where
     type Output = Matrix<MulResult<T, S>>;
 
     fn mul(self, rhs: S) -> Self::Output {
-        self.map(|x| *x * rhs)
+        Matrix::from_vec(self.into_iter().map(|x| *x * rhs).collect(), self.rows, self.cols).unwrap()
     }
 }
 

@@ -39,52 +39,41 @@ impl<T> Matrix<T> {
         Ok(Matrix { rows, cols, data })
         
     }
-}
 
-impl<T> Matrix<T> {
-    pub fn try_map<U, E>(&self, f: impl Fn(&T) -> Result<U, E>) -> Result<Matrix<U>, E> {
-        let data: Vec<U> = self.data.iter()
-                            .map(f)
-                            .collect::<Result<_, _>>()?;
-        
-        Ok(Matrix {
-            rows: self.rows,
-            cols: self.cols,
-            data
-        })
-    }
-
-    pub fn map<U>(&self, f: impl Fn(&T) -> U) -> Matrix<U> {
-        Matrix {
-            rows: self.rows,
-            cols: self.cols,
-            data: self.data.iter().map(f).collect()
-        }
-    }
-
-    pub fn try_zip_map<U, R>(&self, other: &Matrix<U>, f: impl Fn(&T, &U) -> Result<R, error::MatrixError>)
-    -> Result<Matrix<R>, error::MatrixError> {
-        if (self.rows != other.rows) && (self.cols != other.cols) {
-            return Err(error::ShapeError::Dimension {
-                op: "do element-wise operations for",
-                l_rows: self.rows,
-                l_cols: self.cols,
-                r_rows: self.rows,
-                r_cols: self.cols
+    pub fn from_vec(data: Vec<T>, rows: usize, cols: usize) -> Result<Self, error::MatrixError> {
+        if data.len() != rows * cols {
+            return Err(error::ShapeError::Reshape {
+                exp_rows: rows,
+                exp_cols: cols,
+                len: data.len()
             }.into())
         }
 
-        let mut data = Vec::with_capacity(self.data.len());
-        for (a, b) in self.data.iter().zip(&other.data) {
-            data.push(f(a, b)?)
-        }
+        Ok(Matrix {
+            rows,
+            cols,
+            data
+        })
+    }
+}
 
-        Ok(Matrix { rows: self.rows, cols: self.cols, data })
+impl<T> Matrix<T> {
+
+    pub fn try_zip_map<U, R>(&self, other: &Matrix<U>, f: impl Fn(&T, &U) -> R)
+    -> Result<Matrix<R>, error::MatrixError> {
+        Matrix::from_vec(
+        self.into_iter()
+            .zip(other.into_iter())
+            .map(|(a, b)| f(a, b))
+            .collect::<Vec<_>>(),
+            self.rows,
+            self.cols
+        )
     }
 
     pub fn zip_map<U, R>(&self, other: &Matrix<U>, f: impl Fn(&T, &U) -> R)
     -> Matrix<R> {
-        self.try_zip_map(other, |a, b| Ok(f(a, b))).unwrap_or_else(|e| panic!("{e}"))
+        self.try_zip_map(other, f).unwrap()
     }
 }
 
