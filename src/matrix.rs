@@ -14,39 +14,12 @@ impl<T> Matrix<T> {
         self.rows * self.cols
     }
 
-    fn check_index(&self, row: usize, col: usize) -> Result<(), error::MatrixError> {
-        match (row < self.rows, col < self.cols) {
-            (true, true) => Ok(()),
-            (false, false) => Err(error::IndexError::FullOOB { row, col, rows: self.rows, cols: self.cols }.into()),
-            (false, _) => Err(error::IndexError::RowOOB { row, rows: self.rows }.into()),
-            (_, false) => Err(error::IndexError::ColOOB { col, cols: self.cols }.into())
-        }
-    }
-
-    pub fn try_get(&self, row: usize, col: usize) -> Result<&T, error::MatrixError> {
-        self.check_index(row, col)?;
-        Ok(&self.data[row * self.cols + col])
-    }
-
-    pub fn try_get_mut(&mut self, row: usize, col: usize) -> Result<&T, error::MatrixError> {
-        self.check_index(row, col)?;
-        Ok(&mut self.data[row * self.cols + col])
-    }
-
     pub fn get(&self, row: usize, col: usize) -> Option<&T> {
-        if row < self.rows && col < self.cols {
-            Some(&self.data[row * self.cols + col])
-        } else {
-            None
-        }
+        self.data.get(row * self.cols + col)
     }
 
     pub fn get_mut(&mut self, row: usize, col: usize) -> Option<&mut T> {
-        if row < self.rows && col < self.cols {
-            Some(&mut self.data[row * self.cols + col])
-        } else {
-            None
-        }
+        self.data.get_mut(row * self.cols + col)
     }
 
     pub fn new<I>(rows: usize, cols: usize, input: I) -> Result<Matrix<T>, error::MatrixError>
@@ -69,18 +42,24 @@ impl<T> Matrix<T> {
 }
 
 impl<T> Matrix<T> {
-    pub fn try_map<U>(&self, f: impl Fn(&T) -> Result<U, error::MatrixError>) 
-    -> Result<Matrix<U>, error::MatrixError> {
-        let mut data = Vec::with_capacity(self.data.len());
-        for value in &self.data {
-            data.push(f(value)?);
-        }
-
-        Ok(Matrix { rows: self.rows, cols: self.cols, data } )
+    pub fn try_map<U, E>(&self, f: impl Fn(&T) -> Result<U, E>) -> Result<Matrix<U>, E> {
+        let data: Vec<U> = self.data.iter()
+                            .map(f)
+                            .collect::<Result<_, _>>()?;
+        
+        Ok(Matrix {
+            rows: self.rows,
+            cols: self.cols,
+            data
+        })
     }
 
     pub fn map<U>(&self, f: impl Fn(&T) -> U) -> Matrix<U> {
-        self.try_map(|x| Ok(f(x))).unwrap()
+        Matrix {
+            rows: self.rows,
+            cols: self.cols,
+            data: self.data.iter().map(f).collect()
+        }
     }
 
     pub fn try_zip_map<U, R>(&self, other: &Matrix<U>, f: impl Fn(&T, &U) -> Result<R, error::MatrixError>)
