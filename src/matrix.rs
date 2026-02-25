@@ -93,15 +93,15 @@ impl<T: Clone> Matrix<T> {
         }
     }
 
-    pub fn identity(size: usize) -> Matrix<T> where T: Zero + One {
-        let mut data = vec![T::zero(); size * size];
-        for i in 0..size {
-            data[(i + 1) * size] = T::one();
+    pub fn identity(side: usize) -> Matrix<T> where T: Zero + One {
+        let mut data = vec![T::zero(); side * side];
+        for i in 0..side {
+            data[i * side + i] = T::one();
         }
 
         Matrix {
-            rows: size,
-            cols: size,
+            rows: side,
+            cols: side,
             data
         }
     }
