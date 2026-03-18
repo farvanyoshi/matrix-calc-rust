@@ -10,7 +10,7 @@ type DivResult<T, U> = <T as Div<U>>::Output;
 
 impl<T: Copy> Matrix<T> {
     pub fn neg<U: Copy>(&self) -> Matrix<<T as Neg>::Output> where T: Neg {
-        Matrix::from_vec(self.into_iter().map(|x| x.neg()).collect(), self.rows, self.cols).unwrap()
+        Matrix::new(self.into_iter().map(|x| x.neg()), self.rows(), self.cols()).unwrap()
     }
 
     pub fn try_add<U: Copy>(&self, other: &Matrix<U>) -> Result<Matrix<AddResult<T, U>>, MatrixError> where T: Add<U> {
@@ -71,7 +71,7 @@ impl<T: Copy> Matrix<T> {
         T: Mul<S>,
         S: Copy
     {
-        Matrix::from_vec(self.into_iter().map(|x| *x * scalar).collect(), self.rows, self.cols)
+        Matrix::new(self.into_iter().map(|x| *x * scalar), self.rows(), self.cols())
     }
 
     pub fn scalar_mul<S>(&self, scalar: S) -> Matrix<MulResult<T, S>> 
@@ -87,7 +87,7 @@ impl<T: Copy> Matrix<T> {
         T: Div<S>,
         S: Copy
     {
-        Matrix::from_vec(self.into_iter().map(|x| *x / scalar).collect(), self.rows, self.cols)
+        Matrix::new(self.into_iter().map(|x| *x / scalar), self.rows(), self.cols())
     }
 
     pub fn scalar_div<S>(&self, scalar: S) -> Matrix<DivResult<T, S>> 
@@ -105,32 +105,32 @@ impl<T: Copy> Matrix<T> {
         MulResult<T, U>: Zero + Copy + AddAssign
     
     {
-        if self.cols != other.rows {
+        if self.cols() != other.rows() {
             return Err(ShapeError::Dimension {
                 op: "matrix multiply",
-                l_rows: self.rows,
-                l_cols: self.cols,
-                r_rows: other.rows,
-                r_cols: other.cols
+                l_rows: self.rows(),
+                l_cols: self.cols(),
+                r_rows: other.rows(),
+                r_cols: other.cols()
             }.into());
         }
         
-        let rows = self.rows;
-        let cols = other.cols;
-        let shared = self.cols;
+        let rows = self.rows();
+        let cols = other.cols();
+        let shared = self.cols();
         
         let mut data = vec![MulResult::<T, U>::zero(); rows * cols];
 
         for i in 0..rows {
             for k in 0..shared {
-                let a = self.data[i * shared + k];
+                let a = self.data()[i * shared + k];
                 for j in 0..cols {
-                    data[i * cols + j] += a * other.data[k * cols + j];
+                    data[i * cols + j] += a * other.data()[k * cols + j];
                 }
             }
         }
 
-        Ok(Matrix { rows, cols, data })
+        Matrix::new(data, rows, cols)
     }
 
     pub fn matmul<U>(&self, other: &Matrix<U>) -> Matrix<MulResult<T, U>>
@@ -172,7 +172,7 @@ where
     type Output = Matrix<MulResult<T, S>>;
 
     fn mul(self, rhs: S) -> Self::Output {
-        Matrix::from_vec(self.into_iter().map(|x| *x * rhs).collect(), self.rows, self.cols).unwrap()
+        Matrix::new(self.into_iter().map(|x| *x * rhs), self.rows(), self.cols()).unwrap()
     }
 }
 
