@@ -1,43 +1,66 @@
 use crate::error;
-use num_traits::{Zero, One};
+use num_traits::{One, Zero};
 use std::iter::IntoIterator;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Matrix<T> {
-    rows: usize, 
+    rows: usize,
     cols: usize,
-    data: Vec<T>
+    data: Vec<T>,
 }
 
 impl<T> Matrix<T> {
-    pub fn new<I>(input: I, rows: usize, cols: usize) -> Result<Self, error::MatrixError>
-    where I: IntoIterator<Item = T> {
-        let data: Vec<T> = input
-                        .into_iter()
-                        .collect();
+    pub fn try_new<I>(input: I, rows: usize, cols: usize) -> Result<Self, error::MatrixError>
+    where
+        I: IntoIterator<Item = T>,
+    {
+        let data: Vec<T> = input.into_iter().collect();
 
         if rows * cols != data.len() {
             return Err(error::ShapeError::Reshape {
                 exp_rows: rows,
                 exp_cols: cols,
-                len: data.len()
-            }.into())
+                len: data.len(),
+            }
+            .into());
         }
 
         Ok(Self { rows, cols, data })
-        
+    }
+
+    pub fn new<I>(input: I, rows: usize, cols: usize) -> Self
+    where
+        I: IntoIterator<Item = T>,
+    {
+        Matrix::try_new(input, rows, cols).unwrap()
     }
 
     pub fn zeros(rows: usize, cols: usize) -> Self
-    where T: Zero + Clone {
+    where
+        T: Zero + Clone,
+    {
         Self {
-            rows, cols,
-            data: vec![T::zero(); rows * cols]
+            rows,
+            cols,
+            data: vec![T::zero(); rows * cols],
+        }
+    }
+
+    pub fn ones(rows: usize, cols: usize) -> Self
+    where
+        T: One + Clone,
+    {
+        Self {
+            rows,
+            cols,
+            data: vec![T::one(); rows * cols],
         }
     }
 
     pub fn identity(side: usize) -> Self
-    where T: Zero + One + Clone {
+    where
+        T: Zero + One + Clone,
+    {
         let mut data = vec![T::zero(); side * side];
         for i in 0..side {
             data[i * side + i] = T::one();
@@ -46,7 +69,7 @@ impl<T> Matrix<T> {
         Self {
             rows: side,
             cols: side,
-            data
+            data,
         }
     }
 
@@ -76,21 +99,38 @@ impl<T> Matrix<T> {
 }
 
 impl<T> Matrix<T> {
+    pub fn try_map<U>(&self, f: impl Fn(&T) -> U) -> Result<Matrix<U>, error::MatrixError> {
+        Matrix::try_new(self.into_iter().map(|x| f(x)), self.rows, self.cols)
+    }
 
-    pub fn try_zip_map<U, R>(&self, other: &Matrix<U>, f: impl Fn(&T, &U) -> R)
-    -> Result<Matrix<R>, error::MatrixError> {
-        Matrix::new(
-        self.into_iter()
-            .zip(other.into_iter())
-            .map(|(a, b)| f(a, b)),
+    pub fn map<U>(&self, f: impl Fn(&T) -> U) -> Matrix<U> {
+        self.try_map(f).unwrap()
+    }
+
+    pub fn try_zip_map<U, R>(
+        &self,
+        other: &Matrix<U>,
+        f: impl Fn(&T, &U) -> R,
+    ) -> Result<Matrix<R>, error::MatrixError> {
+        Matrix::try_new(
+            self.into_iter()
+                .zip(other.into_iter())
+                .map(|(a, b)| f(a, b)),
             self.rows,
-            self.cols
+            self.cols,
         )
     }
 
-    pub fn zip_map<U, R>(&self, other: &Matrix<U>, f: impl Fn(&T, &U) -> R)
-    -> Matrix<R> {
+    pub fn zip_map<U, R>(&self, other: &Matrix<U>, f: impl Fn(&T, &U) -> R) -> Matrix<R> {
         self.try_zip_map(other, f).unwrap()
+    }
+
+    pub fn iter(&self) -> std::slice::Iter<'_, T> {
+        self.data.iter()
+    }
+
+    pub fn iter_mut(&mut self) -> std::slice::IterMut<'_, T> {
+        self.data.iter_mut()
     }
 }
 
@@ -108,7 +148,16 @@ impl<'a, T> IntoIterator for &'a Matrix<T> {
     type IntoIter = std::slice::Iter<'a, T>;
 
     fn into_iter(self) -> Self::IntoIter {
-        self.data.iter()
+        self.iter()
+    }
+}
+
+impl<'a, T> IntoIterator for &'a mut Matrix<T> {
+    type Item = &'a mut T;
+    type IntoIter = std::slice::IterMut<'a, T>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter_mut()
     }
 }
 
@@ -117,7 +166,7 @@ impl<T> Matrix<T> {
         self.data.chunks(self.cols)
     }
 
-    pub fn iter_cols(&self, col: usize) -> impl ExactSizeIterator<Item = &T> + DoubleEndedIterator {
+    pub fn iter_col(&self, col: usize) -> impl ExactSizeIterator<Item = &T> + DoubleEndedIterator {
         assert!(col < self.cols);
 
         self.data.iter().skip(col).step_by(self.cols)
@@ -129,7 +178,120 @@ mod tests {
     use super::*;
 
     #[test]
-    fn new_matrix() {
+    fn test_new_matrix() {
+        let manual_matrix = Matrix {
+            rows: 2,
+            cols: 3,
+            data: vec![1, 2, 3, 4, 5, 6],
+        };
+        let function_matrix = Matrix::new([1, 2, 3, 4, 5, 6], 2, 3);
 
+        assert_eq!(manual_matrix, function_matrix);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_bad_new_matrix() {
+        Matrix::new([2.0, 3.0, 4.0], 4, 5);
+    }
+
+    #[test]
+    fn test_specific_matrices() {
+        let mut zero_matrix: Matrix<f64> = Matrix::zeros(2, 2);
+        let identity_matrix: Matrix<f64> = Matrix::identity(2);
+
+        for i in 1..3 {
+            zero_matrix.data[i * i - 1] = 1.0;
+        }
+
+        assert_eq!(zero_matrix, identity_matrix);
+    }
+
+    #[test]
+    fn test_basic_functions() {
+        let mut test_matrix = Matrix::new([4, 3, 3, 2, 1, 0], 2, 3);
+        assert_eq!(test_matrix.rows(), test_matrix.rows);
+        assert_eq!(test_matrix.rows(), 2);
+        assert_eq!(test_matrix.cols(), test_matrix.cols);
+        assert_eq!(test_matrix.cols(), 3);
+        assert_eq!(test_matrix.len(), 6);
+        assert_eq!(*test_matrix.get(1, 2).unwrap(), 0);
+
+        *test_matrix.get_mut(1, 2).unwrap() = 54;
+
+        assert_eq!(*test_matrix.get(1, 2).unwrap(), 54);
+        assert_eq!(
+            *test_matrix.get(1, 2).unwrap(),
+            test_matrix.data()[1 * 3 + 2]
+        )
+    }
+
+    #[test]
+    fn test_map() {
+        let base_matrix = Matrix::new([1, 3, 7, 15, 31, 63, 127, 255].map(|x| x as u8), 4, 2);
+
+        let mapped_matrix = base_matrix.try_map(|x| *x ^ 0b11111111);
+        assert!(mapped_matrix.is_ok());
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_bad_map() {
+        let m = Matrix::new(0..16, 4, 4);
+        m.map(|x| x / 0);
+    }
+
+    #[test]
+    fn test_zip_map() {
+        let m = Matrix::new(0..4, 2, 2);
+        let n: Matrix<i32> = Matrix::ones(2, 2);
+
+        let zipped = m.try_zip_map(&n, |a, b: &i32| {
+            let x = *a as f64;
+            let y = *b as f64;
+            1.0 / ((1.0 / x) + (1.0 / y))
+        });
+        assert!(zipped.is_ok());
+    }
+
+    #[test]
+    fn test_iter() {
+        let m = Matrix::new([9, 8, 7, 6, 5, 4, 3, 2, 1], 3, 3);
+        let mut n = Matrix::new(45 as u16..54 as u16, 3, 3);
+
+        let mut x = m.iter();
+        let mut y = m.iter();
+        assert_eq!(x.next(), y.next());
+
+        *n.iter_mut().next().unwrap() = 9;
+        *n.iter_mut().nth(4).unwrap() = 27;
+
+        assert_eq!(*n.get(1, 1).unwrap(), 27 as u16);
+        assert_eq!(m[(0, 0)], n[(0, 0)]);
+    }
+
+    #[test]
+    fn test_iter_rows() {
+        let m = Matrix::new(0..9, 3, 3);
+        let mut x = m.iter_rows();
+        let temp = x.next().unwrap();
+        let temp2 = &m.data[0..3];
+
+        assert_eq!(*temp, *temp2)
+    }
+
+    #[test]
+    fn test_iter_cols() {
+        let m: Matrix<&str> = Matrix::new(["a", "collection", "of", "flowers"], 2, 2);
+        let mut x = m.iter_col(1);
+        assert_eq!(*x.next().unwrap(), "collection");
+        assert_eq!(*x.next().unwrap(), "flowers");
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_bad_iter_cols() {
+        let m: Matrix<&str> = Matrix::new(["a", "collection", "of", "flowers"], 2, 2);
+        m.iter_col(12).next();
     }
 }

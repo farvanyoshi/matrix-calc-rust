@@ -1,6 +1,6 @@
-pub mod matrix;
 pub mod error;
+pub mod matrix;
 pub mod ops;
 
-pub use matrix::Matrix;
 pub use error::MatrixError;
+pub use matrix::Matrix;
