@@ -89,6 +89,10 @@ impl<T> Matrix<T> {
         self.rows * self.cols
     }
 
+    pub fn is_empty(&self) -> bool {
+        self.len() != 0
+    }
+
     pub fn get(&self, row: usize, col: usize) -> Option<&T> {
         self.data.get(row * self.cols + col)
     }
@@ -100,7 +104,7 @@ impl<T> Matrix<T> {
 
 impl<T> Matrix<T> {
     pub fn try_map<U>(&self, f: impl Fn(&T) -> U) -> Result<Matrix<U>, error::MatrixError> {
-        Matrix::try_new(self.into_iter().map(|x| f(x)), self.rows, self.cols)
+        Matrix::try_new(self.iter().map(f), self.rows, self.cols)
     }
 
     pub fn map<U>(&self, f: impl Fn(&T) -> U) -> Matrix<U> {
@@ -113,9 +117,7 @@ impl<T> Matrix<T> {
         f: impl Fn(&T, &U) -> R,
     ) -> Result<Matrix<R>, error::MatrixError> {
         Matrix::try_new(
-            self.into_iter()
-                .zip(other.into_iter())
-                .map(|(a, b)| f(a, b)),
+            self.iter().zip(other).map(|(a, b)| f(a, b)),
             self.rows,
             self.cols,
         )

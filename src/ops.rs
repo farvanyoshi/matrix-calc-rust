@@ -9,7 +9,7 @@ type MulResult<T, U> = <T as Mul<U>>::Output;
 type DivResult<T, U> = <T as Div<U>>::Output;
 
 impl<T: Copy> Matrix<T> {
-    pub fn neg<U: Copy>(self) -> Matrix<<T as Neg>::Output>
+    pub fn negate(&self) -> Matrix<<T as Neg>::Output>
     where
         T: Neg,
     {
@@ -26,13 +26,6 @@ impl<T: Copy> Matrix<T> {
         self.try_zip_map(other, |a, b| *a + *b)
     }
 
-    pub fn add<U: Copy>(&self, other: &Matrix<U>) -> Matrix<AddResult<T, U>>
-    where
-        T: Add<U>,
-    {
-        self.try_add(other).unwrap_or_else(|e| panic!("{e}"))
-    }
-
     pub fn try_sub<U: Copy>(
         &self,
         other: &Matrix<U>,
@@ -41,13 +34,6 @@ impl<T: Copy> Matrix<T> {
         T: Sub<U>,
     {
         self.try_zip_map(other, |a, b| *a - *b)
-    }
-
-    pub fn sub<U: Copy>(&self, other: &Matrix<U>) -> Matrix<SubResult<T, U>>
-    where
-        T: Sub<U>,
-    {
-        self.try_sub(other).unwrap_or_else(|e| panic!("{e}"))
     }
 
     pub fn try_hadamard<U>(&self, other: &Matrix<U>) -> Result<Matrix<MulResult<T, U>>, MatrixError>
@@ -174,7 +160,7 @@ where
     type Output = Matrix<AddResult<T, U>>;
 
     fn add(self, rhs: &Matrix<U>) -> Self::Output {
-        self.add(rhs)
+        self.try_add(rhs).unwrap()
     }
 }
 
@@ -186,7 +172,7 @@ where
     type Output = Matrix<SubResult<T, U>>;
 
     fn sub(self, rhs: &Matrix<U>) -> Self::Output {
-        self.sub(rhs)
+        self.try_sub(rhs).unwrap()
     }
 }
 
@@ -200,6 +186,19 @@ where
 
     fn mul(self, rhs: S) -> Self::Output {
         self.scalar_mul(rhs)
+    }
+}
+
+impl<T, S> Div<S> for &Matrix<T>
+where
+    T: Copy + Div<S>,
+    S: Copy + Num,
+    DivResult<T, S>: Copy,
+{
+    type Output = Matrix<DivResult<T, S>>;
+
+    fn div(self, rhs: S) -> Self::Output {
+        self.scalar_div(rhs)
     }
 }
 
@@ -233,4 +232,57 @@ impl<T> IndexMut<(usize, usize)> for Matrix<T> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_basic_ops() {
+        let x = Matrix::new(1..5, 2, 2);
+        let y = x.negate();
+        assert_eq!(y[(1, 1)], -4);
+
+        assert_eq!(&x + &x, &x * 2);
+        assert_eq!(&x - &x, Matrix::zeros(2, 2));
+    }
+
+    #[test]
+    fn test_element_div_mul() {
+        let m = Matrix::new([2; 9], 3, 3);
+        m.hadamard(&Matrix::new(0..9, 3, 3));
+        for (i, j) in m.iter().enumerate() {
+            assert_eq!(i * 2, *j);
+        }
+
+        m.el_div(&Matrix::new([1; 9], 3, 3));
+        let res = m.try_el_div(&Matrix::<usize>::zeros(3, 3));
+        assert!(res.is_err());
+    }
+
+    #[test]
+    fn test_matmul() {
+        let m = Matrix::new(0..24, 8, 3);
+        let n = Matrix::new(-1..-16, 3, 5);
+        #[rustfmt::skip]
+        let exp = Matrix::new(
+            [
+                -28, -31, -34, -37, -40,
+                -82, -94, -106, -118, -130,
+                -136, -157, -178, -199, -220,
+                -190, -220, -250, -280, -310,
+                -244, -283, -322, -361, -400,
+                -298, -346, -394, -442, -490,
+                -352, -409, -466, -523, -580,
+                -406, -472, -538, -604, -670,
+            ], 
+            8,
+            5
+        );
+        assert_eq!(m.try_matmul(&n).unwrap(), exp);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_bad_matmul() {
+        let x = Matrix::new(0..24, 3, 8);
+        let y = Matrix::new(6..12, 2, 3);
+        let _res = &x * &y;
+    }
 }
