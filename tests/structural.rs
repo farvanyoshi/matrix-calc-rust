@@ -19,7 +19,7 @@ fn shape_views_and_mutation() {
         v.reborrow().slice(0..1, 0..2).unwrap().fill(7);
     }
     assert_eq!(b, Matrix::from([[1, 7, 9], [4, 7, 6]]));
-    assert!(a.slice(2..1, 0..0).is_err());
+    assert!(a.slice(std::ops::Range { start: 2, end: 1 }, 0..0).is_err());
     let mut z = Matrix::<i32>::zeros(2, 0);
     assert_eq!(z.view().transpose().shape(), (0, 2));
     assert_eq!(z.slice_mut(2..2, 0..0).unwrap().shape(), (0, 0));

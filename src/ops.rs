@@ -8,36 +8,42 @@ use std::ops::{
 };
 
 impl<T: Clone> Matrix<T> {
+    /// Allocate elementwise negation using the scalar's ordinary arithmetic.
     pub fn negate(&self) -> Matrix<<T as Neg>::Output>
     where
         T: Neg,
     {
         self.map(|x| -x.clone())
     }
+    /// Add identically shaped matrices; return a dimension error on mismatch.
     pub fn try_add<U: Clone>(&self, rhs: &Matrix<U>) -> Result<Matrix<<T as Add<U>>::Output>>
     where
         T: Add<U>,
     {
         self.try_zip_map(rhs, |a, b| a.clone() + b.clone())
     }
+    /// Subtract identically shaped matrices; return a dimension error on mismatch.
     pub fn try_sub<U: Clone>(&self, rhs: &Matrix<U>) -> Result<Matrix<<T as Sub<U>>::Output>>
     where
         T: Sub<U>,
     {
         self.try_zip_map(rhs, |a, b| a.clone() - b.clone())
     }
+    /// Multiply identically shaped matrices element by element.
     pub fn try_hadamard<U: Clone>(&self, rhs: &Matrix<U>) -> Result<Matrix<<T as Mul<U>>::Output>>
     where
         T: Mul<U>,
     {
         self.try_zip_map(rhs, |a, b| a.clone() * b.clone())
     }
+    /// Elementwise multiplication; panics if shapes differ.
     pub fn hadamard<U: Clone>(&self, rhs: &Matrix<U>) -> Matrix<<T as Mul<U>>::Output>
     where
         T: Mul<U>,
     {
         self.try_hadamard(rhs).expect("incompatible matrix shapes")
     }
+    /// Validate identical shapes, then reject zero divisors before elementwise division.
     pub fn try_element_div<U: Clone + Zero>(
         &self,
         rhs: &Matrix<U>,
@@ -51,6 +57,7 @@ impl<T: Clone> Matrix<T> {
         }
         self.try_zip_map(rhs, |a, b| a.clone() / b.clone())
     }
+    /// Elementwise division; panics for shape mismatch or a zero divisor.
     pub fn element_div<U: Clone + Zero>(&self, rhs: &Matrix<U>) -> Matrix<<T as Div<U>>::Output>
     where
         T: Div<U>,
@@ -67,24 +74,28 @@ impl<T: Clone> Matrix<T> {
     {
         self.try_element_div(rhs)
     }
+    /// Compatibility alias for `element_div`, including its panic behavior.
     pub fn el_div<U: Clone + Zero>(&self, rhs: &Matrix<U>) -> Matrix<<T as Div<U>>::Output>
     where
         T: Div<U>,
     {
         self.element_div(rhs)
     }
+    /// Allocate elementwise addition of a scalar.
     pub fn scalar_add<S: Clone>(&self, x: S) -> Matrix<<T as Add<S>>::Output>
     where
         T: Add<S>,
     {
         self.map(|a| a.clone() + x.clone())
     }
+    /// Allocate elementwise subtraction of a scalar.
     pub fn scalar_sub<S: Clone>(&self, x: S) -> Matrix<<T as Sub<S>>::Output>
     where
         T: Sub<S>,
     {
         self.map(|a| a.clone() - x.clone())
     }
+    /// Allocate elementwise multiplication by a scalar; ordinary scalar overflow rules apply.
     pub fn scalar_mul<S: Clone>(&self, x: S) -> Matrix<<T as Mul<S>>::Output>
     where
         T: Mul<S>,
@@ -98,6 +109,7 @@ impl<T: Clone> Matrix<T> {
     {
         Ok(self.scalar_mul(x))
     }
+    /// Reject a zero scalar, then divide each element using scalar arithmetic.
     pub fn try_scalar_div<S: Clone + Zero>(&self, x: S) -> Result<Matrix<<T as Div<S>>::Output>>
     where
         T: Div<S>,
@@ -107,20 +119,28 @@ impl<T: Clone> Matrix<T> {
         }
         Ok(self.map(|a| a.clone() / x.clone()))
     }
+    /// Divide every element by a scalar; panics for a zero divisor.
     pub fn scalar_div<S: Clone + Zero>(&self, x: S) -> Matrix<<T as Div<S>>::Output>
     where
         T: Div<S>,
     {
         self.try_scalar_div(x).expect("invalid scalar division")
     }
+    /// Multiply compatible matrices, checking output dimensions and reservation failure.
     pub fn try_matmul<U: Clone>(&self, rhs: &Matrix<U>) -> Result<Matrix<<T as Mul<U>>::Output>>
     where
         T: Mul<U>,
         <T as Mul<U>>::Output: Zero + Clone + AddAssign,
     {
-        crate::view::multiply(self, rhs)
+        if self.cols() != rhs.rows() {
+            return Err(self.dimension_error(rhs, "multiply"));
+        }
+        let mut out = Matrix::try_zeros(self.rows(), rhs.cols())?;
+        multiply_owned_into(self, rhs, &mut out)?;
+        Ok(out)
     }
 
+    /// Matrix multiplication; panics on incompatible dimensions or allocation failure.
     pub fn matmul<U: Clone>(&self, rhs: &Matrix<U>) -> Matrix<<T as Mul<U>>::Output>
     where
         T: Mul<U>,
@@ -133,13 +153,42 @@ impl<T: Clone> Matrix<T> {
     where
         T: Mul<Output = T> + Zero + AddAssign,
     {
-        if out.shape() != (self.rows(), rhs.cols()) {
-            return Err(out.dimension_error(self, "write multiplication output"));
-        }
-        let result = self.try_matmul(rhs)?;
-        *out = result;
-        Ok(())
+        multiply_owned_into(self, rhs, out)
     }
+}
+fn multiply_owned_into<T: Clone + Mul<U>, U: Clone>(
+    a: &Matrix<T>,
+    b: &Matrix<U>,
+    out: &mut Matrix<T::Output>,
+) -> Result<()>
+where
+    T::Output: Zero + Clone + AddAssign,
+{
+    if a.cols() != b.rows() {
+        return Err(a.dimension_error(b, "multiply"));
+    }
+    if out.shape() != (a.rows(), b.cols()) {
+        return Err(crate::ShapeError::Dimension {
+            op: "write multiplication",
+            l_rows: a.rows(),
+            l_cols: b.cols(),
+            r_rows: out.rows(),
+            r_cols: out.cols(),
+        }
+        .into());
+    }
+    for cell in out.data_mut() {
+        *cell = T::Output::zero();
+    }
+    for r in 0..a.rows() {
+        let output = out.row_mut(r).unwrap();
+        for (k, x) in a.row(r).unwrap().iter().enumerate() {
+            for (cell, y) in output.iter_mut().zip(b.row(k).unwrap()) {
+                *cell += x.clone() * y.clone();
+            }
+        }
+    }
+    Ok(())
 }
 macro_rules! binary {
     ($trait:ident,$method:ident,$try_method:ident) => {

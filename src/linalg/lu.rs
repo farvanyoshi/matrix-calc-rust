@@ -14,6 +14,7 @@ pub struct Lu<T> {
     cutoff: T,
 }
 impl<T: Real> Lu<T> {
+    /// Compute this factorization with explicit numerical options; reject invalid input and exhausted iteration.
     pub fn decompose(a: &Matrix<T>, options: DecompositionOptions<T>) -> Result<Self> {
         let n = a.square()?;
         let tol = options.resolve(n)?;
@@ -45,6 +46,9 @@ impl<T: Real> Lu<T> {
             }
         }
         packed.finite()?;
+        if (0..n).any(|r| (r..n).any(|c| !(packed[(r, c)] * scale).is_finite())) {
+            return Err(NumericError::NonFinite.into());
+        }
         Ok(Self {
             packed,
             permutation,
@@ -53,9 +57,11 @@ impl<T: Real> Lu<T> {
             cutoff: tol.scaled(scale),
         })
     }
+    /// Original row/column indices in the order described by this factorization.
     pub fn permutation(&self) -> &[usize] {
         &self.permutation
     }
+    /// Allocate the permutation matrix matching this factorization's documented convention.
     pub fn permutation_matrix(&self) -> Matrix<T> {
         Matrix::from_fn(self.packed.rows(), self.packed.rows(), |r, c| {
             if self.permutation[r] == c {
@@ -65,18 +71,16 @@ impl<T: Real> Lu<T> {
             }
         })
     }
+    /// Allocate the lower factor in the original input units/convention.
     pub fn lower(&self) -> Matrix<T> {
         let n = self.packed.rows();
-        Matrix::from_fn(n, n, |r, c| {
-            if r == c {
-                T::one()
-            } else if r > c {
-                self.packed[(r, c)]
-            } else {
-                T::zero()
-            }
+        Matrix::from_fn(n, n, |r, c| match r.cmp(&c) {
+            std::cmp::Ordering::Equal => T::one(),
+            std::cmp::Ordering::Greater => self.packed[(r, c)],
+            std::cmp::Ordering::Less => T::zero(),
         })
     }
+    /// Allocate the upper factor in original input units.
     pub fn upper(&self) -> Matrix<T> {
         let n = self.packed.rows();
         Matrix::from_fn(n, n, |r, c| {
@@ -87,9 +91,11 @@ impl<T: Real> Lu<T> {
             }
         })
     }
+    /// Whether any normalized LU pivot is at or below the selected threshold.
     pub fn is_singular(&self) -> bool {
         (0..self.packed.rows()).any(|i| self.packed[(i, i)].abs() <= self.cutoff)
     }
+    /// Solve using the retained factors; finite RHS dimensions must match the original input.
     pub fn solve(&self, b: &Matrix<T>) -> Result<Matrix<T>> {
         let n = self.packed.rows();
         rhs(n, b)?;
@@ -119,9 +125,11 @@ impl<T: Real> Lu<T> {
         x.finite()?;
         Ok(x)
     }
+    /// Solve against identity to invert finite nonsingular square input.
     pub fn inverse(&self) -> Result<Matrix<T>> {
         self.solve(&Matrix::try_identity(self.packed.rows())?)
     }
+    /// Return determinant sign and log absolute magnitude; exact zero pivots give `(0, -infinity)`.
     pub fn sign_log_determinant(&self) -> (T, T) {
         let mut sign = if self.odd { -T::one() } else { T::one() };
         let mut log = number::<T>(self.packed.rows()) * self.scale.ln();
@@ -145,5 +153,42 @@ impl<T: Real> Lu<T> {
         } else {
             sign * log.exp()
         }
+    }
+}
+impl<T: Real> Lu<T> {
+    /// Solve Aᵀ X = B using the retained factors, without refactorizing.
+    pub fn solve_transpose(&self, b: &Matrix<T>) -> Result<Matrix<T>> {
+        let n = self.packed.rows();
+        rhs(n, b)?;
+        if self.is_singular() {
+            return Err(NumericError::Singular.into());
+        }
+        let mut z = b.scalar_div(self.scale);
+        for i in 0..n {
+            for c in 0..b.cols() {
+                let mut value = z[(i, c)];
+                for k in 0..i {
+                    value -= self.packed[(k, i)] * z[(k, c)];
+                }
+                z[(i, c)] = value / self.packed[(i, i)];
+            }
+        }
+        for i in (0..n).rev() {
+            for c in 0..b.cols() {
+                let mut value = z[(i, c)];
+                for k in i + 1..n {
+                    value -= self.packed[(k, i)] * z[(k, c)];
+                }
+                z[(i, c)] = value;
+            }
+        }
+        let mut out = Matrix::try_zeros(n, b.cols())?;
+        for i in 0..n {
+            for c in 0..b.cols() {
+                out[(self.permutation[i], c)] = z[(i, c)];
+            }
+        }
+        out.finite()?;
+        Ok(out)
     }
 }

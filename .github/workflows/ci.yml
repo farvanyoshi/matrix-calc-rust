@@ -1,0 +1,25 @@
+name: Rust library
+on: [push, pull_request]
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        rust: ['1.85.1', stable]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ matrix.rust }}
+          components: rustfmt, clippy
+      - run: cargo fmt --check
+      - run: cargo test --locked --no-default-features
+      - run: cargo test --locked --all-features
+      - run: cargo test --locked --release --all-features
+      - run: cargo clippy --locked --all-targets --all-features -- -D warnings
+      - run: cargo doc --locked --no-deps --all-features
+        env:
+          RUSTDOCFLAGS: -D warnings
+      - run: cargo run --locked --example solve
+      - run: cargo run --locked --example views
+      - run: cargo package --locked --all-features

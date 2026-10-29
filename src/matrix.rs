@@ -17,6 +17,7 @@ pub(crate) fn checked_size(rows: usize, cols: usize) -> Result<usize> {
 /// panic independently, and ordinary allocation may abort on exhaustion.
 #[must_use]
 #[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct Matrix<T> {
     pub(crate) rows: usize,
     pub(crate) cols: usize,
@@ -63,8 +64,12 @@ impl<T> Matrix<T> {
         cols: usize,
         mut f: impl FnMut(usize, usize) -> T,
     ) -> Result<Self> {
+        let count = checked_size(rows, cols)?;
         let mut data = Vec::new();
-        data.try_reserve_exact(checked_size(rows, cols)?)?;
+        data.try_reserve_exact(count)?;
+        if count == 0 {
+            return Ok(Self { rows, cols, data });
+        }
         for r in 0..rows {
             for c in 0..cols {
                 data.push(f(r, c));
@@ -72,9 +77,11 @@ impl<T> Matrix<T> {
         }
         Ok(Self { rows, cols, data })
     }
+    /// Coordinate-based construction; panics on invalid dimensions or allocation failure.
     pub fn from_fn(rows: usize, cols: usize, f: impl FnMut(usize, usize) -> T) -> Self {
         Self::try_from_fn(rows, cols, f).expect("invalid matrix dimensions")
     }
+    /// Allocate cloned copies of a value, checking shape overflow and reservation failure.
     pub fn try_filled(rows: usize, cols: usize, value: T) -> Result<Self>
     where
         T: Clone,
@@ -85,36 +92,42 @@ impl<T> Matrix<T> {
         data.resize(len, value);
         Ok(Self { rows, cols, data })
     }
+    /// Fill a new matrix with cloned values; panics on invalid dimensions/allocation.
     pub fn filled(rows: usize, cols: usize, value: T) -> Self
     where
         T: Clone,
     {
         Self::try_filled(rows, cols, value).expect("invalid matrix dimensions")
     }
+    /// Allocate additive zeros, checking dimensions and reservation failure.
     pub fn try_zeros(rows: usize, cols: usize) -> Result<Self>
     where
         T: Zero + Clone,
     {
         Self::try_filled(rows, cols, T::zero())
     }
+    /// Construct additive zeros; panics on invalid dimensions/allocation.
     pub fn zeros(rows: usize, cols: usize) -> Self
     where
         T: Zero + Clone,
     {
         Self::try_zeros(rows, cols).expect("invalid matrix dimensions")
     }
+    /// Allocate multiplicative ones, checking dimensions and reservation failure.
     pub fn try_ones(rows: usize, cols: usize) -> Result<Self>
     where
         T: One + Clone,
     {
         Self::try_filled(rows, cols, T::one())
     }
+    /// Construct multiplicative ones; panics on invalid dimensions/allocation.
     pub fn ones(rows: usize, cols: usize) -> Self
     where
         T: One + Clone,
     {
         Self::try_ones(rows, cols).expect("invalid matrix dimensions")
     }
+    /// Allocate a square identity, checking dimensions and reservation failure.
     pub fn try_identity(side: usize) -> Result<Self>
     where
         T: Zero + One + Clone,
@@ -125,6 +138,7 @@ impl<T> Matrix<T> {
         }
         Ok(m)
     }
+    /// Construct a square identity; panics on invalid dimensions/allocation.
     pub fn identity(side: usize) -> Self
     where
         T: Zero + One + Clone,
@@ -140,36 +154,47 @@ impl<T> Matrix<T> {
         }
         Self::try_new(rows.into_iter().flatten(), nr, nc)
     }
+    /// Number of logical rows, including empty rows.
     pub fn rows(&self) -> usize {
         self.rows
     }
+    /// Number of logical columns, including empty columns.
     pub fn cols(&self) -> usize {
         self.cols
     }
+    /// Logical dimensions as `(rows, cols)`.
     pub fn shape(&self) -> (usize, usize) {
         (self.rows, self.cols)
     }
+    /// Whether the two logical dimensions are equal.
     pub fn is_square(&self) -> bool {
         self.rows == self.cols
     }
+    /// Borrow the contiguous row-major elements.
     pub fn data(&self) -> &[T] {
         &self.data
     }
+    /// Mutably borrow elements without allowing the storage length to change.
     pub fn data_mut(&mut self) -> &mut [T] {
         &mut self.data
     }
+    /// Alias for the immutable row-major data slice.
     pub fn as_slice(&self) -> &[T] {
         self.data()
     }
+    /// Alias for the mutable row-major data slice.
     pub fn as_mut_slice(&mut self) -> &mut [T] {
         self.data_mut()
     }
+    /// Consume the matrix and return its row-major buffer.
     pub fn into_vec(self) -> Vec<T> {
         self.data
     }
+    /// Number of stored elements.
     pub fn len(&self) -> usize {
         self.data.len()
     }
+    /// Whether there are zero stored elements, regardless of logical shape.
     pub fn is_empty(&self) -> bool {
         self.data.is_empty()
     }
@@ -195,24 +220,30 @@ impl<T> Matrix<T> {
             .into()),
         }
     }
+    /// Borrow an element; invalid logical coordinates return `None`.
     pub fn get(&self, row: usize, col: usize) -> Option<&T> {
         self.coordinate(row, col).ok().map(|i| &self.data[i])
     }
+    /// Mutably borrow an element; invalid logical coordinates return `None`.
     pub fn get_mut(&mut self, row: usize, col: usize) -> Option<&mut T> {
         let i = self.coordinate(row, col).ok()?;
         Some(&mut self.data[i])
     }
+    /// Borrow an element or return a detailed row/column error.
     pub fn try_get(&self, row: usize, col: usize) -> Result<&T> {
         Ok(&self.data[self.coordinate(row, col)?])
     }
+    /// Mutably borrow an element or return a detailed row/column error.
     pub fn try_get_mut(&mut self, row: usize, col: usize) -> Result<&mut T> {
         let i = self.coordinate(row, col)?;
         Ok(&mut self.data[i])
     }
+    /// Replace one element after validating both logical coordinates.
     pub fn set(&mut self, row: usize, col: usize, value: T) -> Result<()> {
         *self.try_get_mut(row, col)? = value;
         Ok(())
     }
+    /// Borrow one contiguous row, including a valid empty row; invalid rows return `None`.
     pub fn row(&self, row: usize) -> Option<&[T]> {
         if row >= self.rows {
             None
@@ -220,6 +251,7 @@ impl<T> Matrix<T> {
             Some(&self.data[row * self.cols..(row + 1) * self.cols])
         }
     }
+    /// Mutably borrow one row; invalid rows return `None`.
     pub fn row_mut(&mut self, row: usize) -> Option<&mut [T]> {
         if row >= self.rows {
             None
@@ -227,17 +259,21 @@ impl<T> Matrix<T> {
             Some(&mut self.data[row * self.cols..(row + 1) * self.cols])
         }
     }
+    /// Iterate elements in logical row-major order.
     pub fn iter(&self) -> std::slice::Iter<'_, T> {
         self.data.iter()
     }
+    /// Mutably iterate elements in row-major order.
     pub fn iter_mut(&mut self) -> std::slice::IterMut<'_, T> {
         self.data.iter_mut()
     }
+    /// Iterate all logical rows, including empty rows; supports reverse traversal.
     pub fn iter_rows(
         &self,
     ) -> impl ExactSizeIterator<Item = &[T]> + DoubleEndedIterator + FusedIterator {
         (0..self.rows).map(|r| &self.data[r * self.cols..(r + 1) * self.cols])
     }
+    /// Iterate disjoint mutable rows, including empty rows.
     pub fn iter_rows_mut(&mut self) -> RowsMut<'_, T> {
         RowsMut {
             rest: &mut self.data,
@@ -253,6 +289,7 @@ impl<T> Matrix<T> {
         assert!(col < self.cols, "column out of bounds");
         self.data.iter().skip(col).step_by(self.cols).fuse()
     }
+    /// Iterate mutable column elements; panics for an invalid column.
     pub fn iter_col_mut(
         &mut self,
         col: usize,
@@ -260,6 +297,7 @@ impl<T> Matrix<T> {
         assert!(col < self.cols, "column out of bounds");
         self.data.iter_mut().skip(col).step_by(self.cols).fuse()
     }
+    /// Allocate a shape-preserving transform in row-major order; the callback may mutate captured state.
     pub fn map<U>(&self, mut f: impl FnMut(&T) -> U) -> Matrix<U> {
         Matrix {
             rows: self.rows,
@@ -308,6 +346,7 @@ impl<T> Matrix<T> {
         }
         Ok(self.rows)
     }
+    /// Validate identical shapes before allocating pairwise callback results.
     pub fn try_zip_map<U, R>(
         &self,
         other: &Matrix<U>,
@@ -320,6 +359,7 @@ impl<T> Matrix<T> {
             self.cols,
         )
     }
+    /// Pairwise mapping; panics on incompatible dimensions.
     pub fn zip_map<U, R>(&self, other: &Matrix<U>, f: impl FnMut(&T, &U) -> R) -> Matrix<R> {
         self.try_zip_map(other, f)
             .expect("incompatible matrix shapes")
@@ -476,10 +516,7 @@ mod tests {
         *test_matrix.get_mut(1, 2).unwrap() = 54;
 
         assert_eq!(*test_matrix.get(1, 2).unwrap(), 54);
-        assert_eq!(
-            *test_matrix.get(1, 2).unwrap(),
-            test_matrix.data()[1 * 3 + 2]
-        )
+        assert_eq!(*test_matrix.get(1, 2).unwrap(), test_matrix.data()[5])
     }
 
     #[test]
@@ -487,14 +524,27 @@ mod tests {
         let base_matrix = Matrix::new([1, 3, 7, 15, 31, 63, 127, 255].map(|x| x as u8), 4, 2);
 
         let mapped_matrix = base_matrix.try_map(|x| Ok::<_, ()>(*x ^ 0b11111111));
-        assert!(mapped_matrix.is_ok());
+        assert_eq!(
+            mapped_matrix.unwrap().data(),
+            &[254, 252, 248, 240, 224, 192, 128, 0]
+        );
     }
 
     #[test]
-    #[should_panic]
-    fn test_bad_map() {
-        let m = Matrix::new(0..16, 4, 4);
-        let _ = m.map(|x| x / 0);
+    fn test_fallible_map() {
+        let m = Matrix::new(0..4, 2, 2);
+        let mut calls = 0;
+        let result = m.try_map(|x| {
+            calls += 1;
+            if *x == 2 {
+                Err("callback failed")
+            } else {
+                Ok(*x * 2)
+            }
+        });
+        assert_eq!(result.unwrap_err(), "callback failed");
+        assert_eq!(calls, 3);
+        assert_eq!(m.data(), &[0, 1, 2, 3]);
     }
 
     #[test]
@@ -507,22 +557,27 @@ mod tests {
             let y = *b as f64;
             1.0 / ((1.0 / x) + (1.0 / y))
         });
-        assert!(zipped.is_ok());
+        assert!(zipped.unwrap().approx_eq(
+            &Matrix::new([0.0, 0.5, 2.0 / 3.0, 0.75], 2, 2),
+            crate::Tolerance::new(1e-15, 1e-15).unwrap()
+        ));
     }
 
     #[test]
     fn test_iter() {
         let m = Matrix::new([9, 8, 7, 6, 5, 4, 3, 2, 1], 3, 3);
-        let mut n = Matrix::new(45 as u16..54 as u16, 3, 3);
+        let mut n = Matrix::new(45_u16..54_u16, 3, 3);
 
-        let mut x = m.iter();
-        let mut y = m.iter();
-        assert_eq!(x.next(), y.next());
+        assert_eq!(
+            m.iter().copied().collect::<Vec<_>>(),
+            vec![9, 8, 7, 6, 5, 4, 3, 2, 1]
+        );
+        assert_eq!(m.clone().into_iter().collect::<Vec<_>>(), m.data());
 
         *n.iter_mut().next().unwrap() = 9;
         *n.iter_mut().nth(4).unwrap() = 27;
 
-        assert_eq!(*n.get(1, 1).unwrap(), 27 as u16);
+        assert_eq!(*n.get(1, 1).unwrap(), 27_u16);
         assert_eq!(m[(0, 0)], n[(0, 0)]);
     }
 

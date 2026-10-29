@@ -2,9 +2,9 @@ use super::{normalized, rhs};
 use crate::{
     DecompositionOptions, Matrix, Real,
     error::{NumericError, Result},
-    numeric::number,
+    numeric::{number, scaled_ratio},
 };
-/// Compact Householder QR. With pivoting, `A*P = Q*R`, and permutation[j]
+/// Compact Householder QR. With pivoting, `A*P = Q*R`, and `permutation[j]`
 /// identifies the original column now occupying position j.
 #[derive(Clone, Debug)]
 pub struct Qr<T> {
@@ -15,6 +15,7 @@ pub struct Qr<T> {
     cutoff: T,
 }
 impl<T: Real> Qr<T> {
+    /// Compute this factorization with explicit numerical options; reject invalid input and exhausted iteration.
     pub fn decompose(a: &Matrix<T>, pivot: bool, options: DecompositionOptions<T>) -> Result<Self> {
         let tol = options.resolve(a.rows().max(a.cols()))?;
         let (mut r, scale) = normalized(a)?;
@@ -61,6 +62,9 @@ impl<T: Real> Qr<T> {
             reflectors.push(v);
         }
         r.finite()?;
+        if r.iter().any(|x| !(*x * scale).is_finite()) {
+            return Err(NumericError::NonFinite.into());
+        }
         Ok(Self {
             r,
             reflectors,
@@ -69,9 +73,11 @@ impl<T: Real> Qr<T> {
             cutoff: tol.scaled(scale),
         })
     }
+    /// Original row/column indices in the order described by this factorization.
     pub fn permutation(&self) -> &[usize] {
         &self.permutation
     }
+    /// Allocate the permutation matrix matching this factorization's documented convention.
     pub fn permutation_matrix(&self) -> Matrix<T> {
         Matrix::from_fn(self.r.cols(), self.r.cols(), |r, c| {
             if self.permutation[c] == r {
@@ -81,6 +87,7 @@ impl<T: Real> Qr<T> {
             }
         })
     }
+    /// Count R diagonal entries above the threshold; use pivoted QR for a rank-revealing estimate.
     pub fn rank(&self) -> usize {
         (0..self.r.rows().min(self.r.cols()))
             .filter(|&i| self.r[(i, i)].abs() > self.cutoff)
@@ -92,9 +99,11 @@ impl<T: Real> Qr<T> {
             self.r[(r, c)] * self.scale
         })
     }
+    /// Allocate the full zero-padded R in the original input units.
     pub fn r_full(&self) -> Matrix<T> {
         self.r.scalar_mul(self.scale)
     }
+    /// Allocate economy Q by applying the stored reflectors to a rectangular identity.
     pub fn q(&self) -> Matrix<T> {
         self.apply_q(&Matrix::from_fn(
             self.r.rows(),
@@ -103,19 +112,22 @@ impl<T: Real> Qr<T> {
         ))
         .expect("valid identity")
     }
+    /// Allocate full square Q by applying the stored reflectors to identity.
     pub fn q_full(&self) -> Matrix<T> {
         self.apply_q(&Matrix::identity(self.r.rows()))
             .expect("valid identity")
     }
+    /// Apply Q to finite RHS columns without materializing Q; row counts must match.
     pub fn apply_q(&self, b: &Matrix<T>) -> Result<Matrix<T>> {
         self.apply(b, false)
     }
+    /// Apply Qᵀ to finite RHS columns without materializing Q; row counts must match.
     pub fn apply_q_transpose(&self, b: &Matrix<T>) -> Result<Matrix<T>> {
         self.apply(b, true)
     }
     fn apply(&self, b: &Matrix<T>, transpose: bool) -> Result<Matrix<T>> {
         rhs(self.r.rows(), b)?;
-        let mut out = b.clone();
+        let (mut out, scale) = normalized(b)?;
         let count = self.reflectors.len();
         for step in 0..count {
             let k = if transpose { step } else { count - 1 - step };
@@ -133,6 +145,7 @@ impl<T: Real> Qr<T> {
                 }
             }
         }
+        let out = out.scalar_mul(scale);
         out.finite()?;
         Ok(out)
     }
@@ -143,8 +156,9 @@ impl<T: Real> Qr<T> {
         if self.r.rows() < n || self.rank() < n {
             return Err(NumericError::RankDeficient.into());
         }
-        let y = self.apply_q_transpose(b)?;
-        let mut xp = Matrix::<T>::try_from_fn(n, b.cols(), |r, c| y[(r, c)] / self.scale)?;
+        let (scaled_b, bscale) = normalized(b)?;
+        let y = self.apply_q_transpose(&scaled_b)?;
+        let mut xp = Matrix::<T>::try_from_fn(n, b.cols(), |r, c| y[(r, c)])?;
         for i in (0..n).rev() {
             for c in 0..b.cols() {
                 let mut value = xp[(i, c)];
@@ -156,7 +170,7 @@ impl<T: Real> Qr<T> {
         }
         let out = Matrix::try_from_fn(n, b.cols(), |r, c| {
             let i = self.permutation.iter().position(|&x| x == r).unwrap();
-            xp[(i, c)]
+            scaled_ratio(xp[(i, c)], bscale, self.scale, T::one())
         })?;
         out.finite()?;
         Ok(out)

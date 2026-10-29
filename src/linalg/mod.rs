@@ -1,15 +1,19 @@
 //! Reusable real-valued decompositions. Inputs must be finite; no normal equations
 //! or inverse-based solves are used. Factor conventions are documented on types.
 mod cholesky;
+mod eigen;
 mod lu;
 mod qr;
+mod svd;
 use crate::{
     DecompositionOptions, Matrix, Real,
     error::{NumericError, Result},
 };
 pub use cholesky::Cholesky;
+pub use eigen::SymmetricEigen;
 pub use lu::Lu;
 pub use qr::Qr;
+pub use svd::Svd;
 
 pub(crate) fn normalized<T: Real>(a: &Matrix<T>) -> Result<(Matrix<T>, T)> {
     a.finite()?;
@@ -35,15 +39,19 @@ pub(crate) fn rhs<T: Real>(rows: usize, b: &Matrix<T>) -> Result<()> {
     Ok(())
 }
 impl<T: Real> Matrix<T> {
+    /// Compute scaled partial-row-pivoted LU of finite square input.
     pub fn lu(&self) -> Result<Lu<T>> {
         Lu::decompose(self, DecompositionOptions::default())
     }
+    /// Compute LU with an explicit numerical singularity threshold.
     pub fn lu_with_options(&self, options: DecompositionOptions<T>) -> Result<Lu<T>> {
         Lu::decompose(self, options)
     }
+    /// Solve a finite square system with one or more right-hand-side columns using LU.
     pub fn solve(&self, b: &Self) -> Result<Self> {
         self.lu()?.solve(b)
     }
+    /// Compute a square determinant; its magnitude can underflow or overflow.
     pub fn determinant(&self) -> Result<T> {
         Ok(self.lu()?.determinant())
     }
@@ -51,24 +59,66 @@ impl<T: Real> Matrix<T> {
     pub fn sign_log_determinant(&self) -> Result<(T, T)> {
         Ok(self.lu()?.sign_log_determinant())
     }
+    /// Solve against identity to invert finite nonsingular square input.
     pub fn inverse(&self) -> Result<Self> {
         self.lu()?.inverse()
     }
+    /// Factor finite symmetric positive-definite input with the default tolerance.
     pub fn cholesky(&self) -> Result<Cholesky<T>> {
         Cholesky::decompose(self, DecompositionOptions::default())
     }
+    /// Compute Cholesky with explicit symmetry and pivot tolerances.
     pub fn cholesky_with_options(&self, options: DecompositionOptions<T>) -> Result<Cholesky<T>> {
         Cholesky::decompose(self, options)
     }
+    /// Compute an unpivoted compact Householder QR of finite input.
     pub fn qr(&self) -> Result<Qr<T>> {
         Qr::decompose(self, false, DecompositionOptions::default())
     }
+    /// Compute compact column-pivoted Householder QR of finite input.
     pub fn pivoted_qr(&self) -> Result<Qr<T>> {
         Qr::decompose(self, true, DecompositionOptions::default())
     }
+    /// Compute QR with explicit column-pivoting and rank-threshold settings.
     pub fn qr_with_options(&self, pivot: bool, options: DecompositionOptions<T>) -> Result<Qr<T>> {
         Qr::decompose(self, pivot, options)
     }
+    /// Compute the economy SVD of finite input with bounded default iteration.
+    pub fn svd(&self) -> Result<Svd<T>> {
+        Svd::decompose(self, DecompositionOptions::default())
+    }
+    /// Compute economy SVD with explicit rank tolerance and sweep limit.
+    pub fn svd_with_options(&self, options: DecompositionOptions<T>) -> Result<Svd<T>> {
+        Svd::decompose(self, options)
+    }
+    /// Compute a tolerance-truncated Moore–Penrose pseudoinverse using SVD.
+    pub fn pseudoinverse(&self) -> Result<Self> {
+        self.svd()?.pseudoinverse()
+    }
+    /// Numerical rank from singular values above the selected threshold.
+    pub fn rank(&self) -> Result<usize> {
+        Ok(self.svd()?.rank())
+    }
+    /// Matrix spectral norm (largest singular value), distinct from the Frobenius norm.
+    pub fn norm_2(&self) -> Result<T> {
+        Ok(self.svd()?.spectral_norm())
+    }
+    /// SVD-based 2-norm condition number; numerical deficiency gives infinity, empty input gives one.
+    pub fn condition_number(&self) -> Result<T> {
+        Ok(self.svd()?.condition_number())
+    }
+    /// Compute ascending real eigenvalues and orthonormal column eigenvectors of symmetric input.
+    pub fn symmetric_eigen(&self) -> Result<SymmetricEigen<T>> {
+        SymmetricEigen::decompose(self, DecompositionOptions::default())
+    }
+    /// Compute symmetric eigenpairs with explicit symmetry/convergence tolerance and sweep limit.
+    pub fn symmetric_eigen_with_options(
+        &self,
+        options: DecompositionOptions<T>,
+    ) -> Result<SymmetricEigen<T>> {
+        SymmetricEigen::decompose(self, options)
+    }
+    /// Signed integer power of square input; negative exponents first invert the matrix.
     pub fn powi(&self, power: i32) -> Result<Self> {
         if power < 0 {
             self.inverse()?.pow(power.unsigned_abs())
@@ -76,6 +126,7 @@ impl<T: Real> Matrix<T> {
             self.pow(power as u32)
         }
     }
+    /// Solve with the lower triangle; `unit_diagonal` treats diagonal entries as one.
     pub fn solve_lower(&self, b: &Self, unit_diagonal: bool) -> Result<Self> {
         triangular(
             self,
@@ -85,6 +136,7 @@ impl<T: Real> Matrix<T> {
             DecompositionOptions::default(),
         )
     }
+    /// Solve with the upper triangle; `unit_diagonal` treats diagonal entries as one.
     pub fn solve_upper(&self, b: &Self, unit_diagonal: bool) -> Result<Self> {
         triangular(
             self,
@@ -94,6 +146,7 @@ impl<T: Real> Matrix<T> {
             DecompositionOptions::default(),
         )
     }
+    /// Solve using a selected triangle and diagonal convention; the unused triangle is ignored.
     pub fn solve_triangular_with_options(
         &self,
         b: &Self,
@@ -141,4 +194,79 @@ fn triangular<T: Real>(
     }
     x.finite()?;
     Ok(x)
+}
+
+/// Explicit least-squares method; Auto uses pivoted QR for full-rank tall input,
+/// and SVD for wide or numerically deficient input.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum LeastSquaresMethod {
+    /// Prefer pivoted QR for full-column-rank tall input; otherwise use SVD.
+    Auto,
+    /// Require full-column-rank tall input and use pivoted Householder QR.
+    Qr,
+    /// Use SVD and return the truncated minimum-norm solution.
+    Svd,
+}
+/// Solution and diagnostics. Residual is the Frobenius norm across all RHS.
+#[must_use]
+#[derive(Clone, Debug)]
+pub struct LeastSquares<T> {
+    /// Computed solution matrix with one column per RHS.
+    pub solution: Matrix<T>,
+    /// Combined Frobenius norm of A*solution - B.
+    pub residual_norm: T,
+    /// Numerical rank reported by the selected decomposition.
+    pub rank: usize,
+    /// Algorithm actually used; never Auto in a successful result.
+    pub method: LeastSquaresMethod,
+    /// Resolved tolerance used for the solve.
+    pub tolerance: crate::Tolerance<T>,
+}
+impl<T: Real> Matrix<T> {
+    /// Auto-select pivoted QR or SVD and return solution, rank, method, and residual diagnostics.
+    pub fn least_squares(&self, b: &Self) -> Result<LeastSquares<T>> {
+        self.least_squares_with_options(
+            b,
+            LeastSquaresMethod::Auto,
+            DecompositionOptions::default(),
+        )
+    }
+    /// Least squares with explicit algorithm, tolerance, and iteration limit.
+    pub fn least_squares_with_options(
+        &self,
+        b: &Self,
+        method: LeastSquaresMethod,
+        options: DecompositionOptions<T>,
+    ) -> Result<LeastSquares<T>> {
+        rhs(self.rows(), b)?;
+        let tolerance = options.resolve(self.rows().max(self.cols()))?;
+        let (solution, rank, used) =
+            if method == LeastSquaresMethod::Svd || self.rows() < self.cols() {
+                if method == LeastSquaresMethod::Qr {
+                    return Err(NumericError::RankDeficient.into());
+                }
+                let svd = self.svd_with_options(options)?;
+                (svd.solve(b)?, svd.rank(), LeastSquaresMethod::Svd)
+            } else {
+                let qr = self.qr_with_options(true, options)?;
+                if qr.rank() == self.cols() {
+                    (qr.solve(b)?, qr.rank(), LeastSquaresMethod::Qr)
+                } else {
+                    if method == LeastSquaresMethod::Qr {
+                        return Err(NumericError::RankDeficient.into());
+                    }
+                    let svd = self.svd_with_options(options)?;
+                    (svd.solve(b)?, svd.rank(), LeastSquaresMethod::Svd)
+                }
+            };
+        let residual = &self.try_matmul(&solution)? - b;
+        residual.finite()?;
+        Ok(LeastSquares {
+            residual_norm: residual.norm_frobenius(),
+            solution,
+            rank,
+            method: used,
+            tolerance,
+        })
+    }
 }

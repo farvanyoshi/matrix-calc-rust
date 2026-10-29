@@ -1,3 +1,7 @@
+#![doc = include_str!("../README.md")]
+#![forbid(unsafe_code)]
+#![warn(missing_docs)]
+
 pub mod error;
 pub mod matrix;
 pub mod ops;
@@ -15,3 +19,9 @@ pub mod linalg;
 pub use linalg::{Cholesky, Lu};
 
 pub use linalg::Qr;
+
+pub use linalg::{LeastSquares, LeastSquaresMethod};
+pub use linalg::{Svd, SymmetricEigen};
+
+#[cfg(feature = "serde")]
+mod serialization;

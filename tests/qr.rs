@@ -50,3 +50,16 @@ fn qr_least_squares() {
             .approx_eq(&a, Tolerance::new(1e-5, 1e-5).unwrap())
     );
 }
+#[test]
+fn orthogonal_application_scales_large_finite_rhs() {
+    let a = Matrix::from([[1f64, 1.], [1., -1.]]);
+    let q = a.qr().unwrap();
+    let b = Matrix::from([[1e308], [0.]]);
+    let transformed = q.apply_q(&b).unwrap();
+    assert!(transformed.all_finite());
+    assert!((transformed.norm_frobenius() / 1e308 - 1.).abs() < 1e-14);
+    let a = a.scalar_mul(1e300);
+    let b = Matrix::from([[1e300], [1e300]]);
+    let solution = a.pivoted_qr().unwrap().solve(&b).unwrap();
+    close(&solution, &Matrix::from([[1.], [0.]]));
+}

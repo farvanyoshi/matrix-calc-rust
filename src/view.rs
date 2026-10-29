@@ -8,8 +8,11 @@ use std::ops::{AddAssign, Index, IndexMut, Mul, Range};
 
 /// Read-only matrix access shared by owned matrices and strided views.
 pub trait MatrixRead<T> {
+    /// Logical row count.
     fn rows(&self) -> usize;
+    /// Logical column count.
     fn cols(&self) -> usize;
+    /// Borrow an element; implementations may panic on invalid coordinates.
     fn at(&self, row: usize, col: usize) -> &T;
 }
 impl<T> MatrixRead<T> for Matrix<T> {
@@ -86,6 +89,7 @@ pub struct MatrixViewMut<'a, T> {
     layout: Layout,
 }
 impl<T> Matrix<T> {
+    /// Borrow a full immutable strided view without copying elements.
     pub fn view(&self) -> MatrixView<'_, T> {
         MatrixView {
             data: &self.data,
@@ -98,6 +102,7 @@ impl<T> Matrix<T> {
             },
         }
     }
+    /// Borrow a full exclusive strided view without copying elements.
     pub fn view_mut(&mut self) -> MatrixViewMut<'_, T> {
         MatrixViewMut {
             data: &mut self.data,
@@ -110,9 +115,11 @@ impl<T> Matrix<T> {
             },
         }
     }
+    /// Borrow a submatrix using half-open row and column ranges; invalid ranges return an error.
     pub fn slice(&self, rows: Range<usize>, cols: Range<usize>) -> Result<MatrixView<'_, T>> {
         self.view().slice(rows, cols)
     }
+    /// Borrow an exclusive submatrix using validated half-open ranges.
     pub fn slice_mut(
         &mut self,
         rows: Range<usize>,
@@ -122,42 +129,53 @@ impl<T> Matrix<T> {
     }
 }
 impl<'a, T> MatrixView<'a, T> {
+    /// Number of logical rows, including empty rows.
     pub fn rows(&self) -> usize {
         self.layout.rows
     }
+    /// Number of logical columns, including empty columns.
     pub fn cols(&self) -> usize {
         self.layout.cols
     }
+    /// Logical dimensions as `(rows, cols)`.
     pub fn shape(&self) -> (usize, usize) {
         (self.rows(), self.cols())
     }
+    /// Borrow an element; invalid logical coordinates return `None`.
     pub fn get(&self, r: usize, c: usize) -> Option<&'a T> {
         self.layout.index(r, c).map(|i| &self.data[i])
     }
+    /// Transpose logical axes; owned matrices clone, while views only exchange strides.
     pub fn transpose(self) -> Self {
         Self {
             layout: self.layout.transpose(),
             ..self
         }
     }
+    /// Borrow a submatrix using half-open row and column ranges; invalid ranges return an error.
     pub fn slice(self, rows: Range<usize>, cols: Range<usize>) -> Result<Self> {
         Ok(Self {
             layout: self.layout.slice(rows, cols)?,
             ..self
         })
     }
+    /// Clone the logical view into contiguous row-major storage.
     pub fn to_owned(&self) -> Matrix<T>
     where
         T: Clone,
     {
         self.map(Clone::clone)
     }
+    /// Allocate a shape-preserving transform in row-major order; the callback may mutate captured state.
     pub fn map<U>(&self, mut f: impl FnMut(&T) -> U) -> Matrix<U> {
         Matrix::from_fn(self.rows(), self.cols(), |r, c| f(&self[(r, c)]))
     }
-    pub fn iter(&self) -> impl Iterator<Item = &'a T> + DoubleEndedIterator + '_ {
-        (0..self.rows()).flat_map(move |r| (0..self.cols()).map(move |c| self.get(r, c).unwrap()))
+    /// Iterate elements in logical row-major order.
+    pub fn iter(&self) -> impl ExactSizeIterator<Item = &'a T> + DoubleEndedIterator + '_ {
+        (0..self.rows() * self.cols())
+            .map(move |i| self.get(i / self.cols(), i % self.cols()).unwrap())
     }
+    /// Multiply compatible matrices, checking output dimensions and reservation failure.
     pub fn try_matmul<U: Clone, R: MatrixRead<U>>(
         &self,
         rhs: &R,
@@ -186,47 +204,57 @@ impl<T> Index<(usize, usize)> for MatrixView<'_, T> {
         self.get(r, c).expect("view coordinate out of bounds")
     }
 }
-impl<'a, T> MatrixViewMut<'a, T> {
+impl<T> MatrixViewMut<'_, T> {
+    /// Number of logical rows, including empty rows.
     pub fn rows(&self) -> usize {
         self.layout.rows
     }
+    /// Number of logical columns, including empty columns.
     pub fn cols(&self) -> usize {
         self.layout.cols
     }
+    /// Logical dimensions as `(rows, cols)`.
     pub fn shape(&self) -> (usize, usize) {
         (self.rows(), self.cols())
     }
+    /// Borrow an element; invalid logical coordinates return `None`.
     pub fn get(&self, r: usize, c: usize) -> Option<&T> {
         self.layout.index(r, c).map(|i| &self.data[i])
     }
+    /// Mutably borrow an element; invalid logical coordinates return `None`.
     pub fn get_mut(&mut self, r: usize, c: usize) -> Option<&mut T> {
         let i = self.layout.index(r, c)?;
         Some(&mut self.data[i])
     }
+    /// Reborrow an exclusive view immutably for the duration of this borrow.
     pub fn as_view(&self) -> MatrixView<'_, T> {
         MatrixView {
             data: self.data,
             layout: self.layout,
         }
     }
+    /// Reborrow an exclusive view without consuming its original handle.
     pub fn reborrow(&mut self) -> MatrixViewMut<'_, T> {
         MatrixViewMut {
             data: self.data,
             layout: self.layout,
         }
     }
+    /// Transpose logical axes; owned matrices clone, while views only exchange strides.
     pub fn transpose(self) -> Self {
         Self {
             layout: self.layout.transpose(),
             ..self
         }
     }
+    /// Borrow a submatrix using half-open row and column ranges; invalid ranges return an error.
     pub fn slice(self, rows: Range<usize>, cols: Range<usize>) -> Result<Self> {
         Ok(Self {
             layout: self.layout.slice(rows, cols)?,
             ..self
         })
     }
+    /// Replace every logical element with a clone of the supplied value.
     pub fn fill(&mut self, value: T)
     where
         T: Clone,

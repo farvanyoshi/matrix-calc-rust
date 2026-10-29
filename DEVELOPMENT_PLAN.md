@@ -16,7 +16,8 @@ implementation can follow the resulting API later; this work changes only
   acceptance checks pass. Do not rewrite existing history or publish/push as part
   of this plan.
 - This document is a plan, not a claim that its implementation is complete.
-  Planning has not modified source, manifests, tests, or the Nim checkout.
+  The original planning pass did not modify implementation files. Subsequent
+  implementation changes are tracked on `dev`; the Nim checkout is unchanged.
 
 The completion target includes generic matrix storage and arithmetic, real-valued
 numerics for `f32` and `f64`, reusable decompositions, square and rectangular
@@ -379,11 +380,39 @@ limitations are documented, and remaining follow-on work is explicitly recorded.
 - [x] Inspect the current Rust checkout and baseline.
 - [x] Create `dev` and verify the requested local author/committer identity.
 - [x] Record this plan without changing implementation files.
-- [ ] Milestone 1: repair current behavior and tests.
-- [ ] Milestone 2: settle and implement the consistent core API.
-- [ ] Milestone 3: structural operations, views, vectors, and reductions.
-- [ ] Milestone 4: checked arithmetic and numerical primitives.
-- [ ] Milestone 5: LU, Cholesky, square solves, determinant, and inverse.
-- [ ] Milestone 6: QR and full-rank least squares.
-- [ ] Milestone 7: SVD, pseudoinverse, rank, conditioning, and symmetric eigen.
-- [ ] Milestone 8: measured optimization, documentation, packaging, and release gates.
+- [x] Milestone 1: repair current behavior and tests.
+- [x] Milestone 2: settle and implement the consistent core API.
+- [x] Milestone 3: structural operations, views, vectors, and reductions.
+- [x] Milestone 4: checked arithmetic and numerical primitives.
+- [x] Milestone 5: LU, Cholesky, square solves, determinant, and inverse.
+- [x] Milestone 6: QR and full-rank least squares.
+- [x] Milestone 7: SVD, pseudoinverse, rank, conditioning, and symmetric eigen.
+- [x] Milestone 8: measured optimization, documentation, packaging, and release gates.
+
+
+## Implementation record
+
+All eight milestones are implemented for the release scope above. Source is
+organized into storage/access, arithmetic, structural operations, views,
+numerics, validated serialization, and decomposition modules. Migration notes,
+examples, CI, and numerical limitations are included. The placeholder greeting
+binary was removed to make the release library-only. Runtime dependencies remain
+pure Rust; the independent numerical oracle and property generator are dev-only.
+
+Algorithm adjustment: SVD uses scaled one-sided Jacobi on the input directly,
+with a transpose strategy for wide matrices. Symmetric eigen uses scaled cyclic
+Jacobi. These replace the planned bidiagonal/tridiagonal iterations while retaining
+bounded convergence, orthogonality, and residual validation; neither forms normal
+equations. The choice, convergence policy, performance tradeoffs, and numerical
+limits are documented in NUMERICS.md. The direct algorithms passed independent
+oracle comparisons and tests of nonunique/rank-deficient cases.
+
+Fixed-seed generated tests cover 128 structural cases, 128 SVD/QR/least-squares
+cases, 96 LU/Cholesky/symmetric-eigen cases, and 64 single-precision cases, in addition to analytic,
+boundary, error-path, serialization, and documentation examples. BENCHMARKS.md
+records measured improvements from the shared contiguous multiplication kernel
+and allocation reuse; the strided path keeps the general safe implementation.
+
+Release validation and exact results are recorded in VALIDATION.md. No remote
+push or crate publication is part of this implementation. The repository has no
+declared license; external publication still requires the owner's license decision.
