@@ -408,10 +408,13 @@ limits are documented in NUMERICS.md. The direct algorithms passed independent
 oracle comparisons and tests of nonunique/rank-deficient cases.
 
 Fixed-seed generated tests cover 128 structural cases, 128 SVD/QR/least-squares
-cases, 96 LU/Cholesky/symmetric-eigen cases, and 64 single-precision cases, in addition to analytic,
+cases, 96 LU/Cholesky/symmetric-eigen cases, and 64 single-precision cases, in
+addition to analytic,
 boundary, error-path, serialization, and documentation examples. BENCHMARKS.md
 records measured improvements from the shared contiguous multiplication kernel
-and allocation reuse; the strided path keeps the general safe implementation.
+and allocation reuse, plus longer steady-state samples through 256×256; the
+strided path keeps the general safe implementation. Six targeted borrowing and
+structural tests also passed under Miri on the isolated 2026-10-29 nightly.
 
 Release validation and exact results are recorded in VALIDATION.md. No remote
 push or crate publication is part of this implementation. The repository has no

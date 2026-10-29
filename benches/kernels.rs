@@ -6,17 +6,24 @@ fn measure(label: &str, mut f: impl FnMut()) {
     let mut samples = Vec::new();
     for _ in 0..7 {
         let start = Instant::now();
-        for _ in 0..10 {
-            f();
+        let mut repetitions = 0u64;
+        loop {
+            for _ in 0..32 {
+                f();
+            }
+            repetitions += 32;
+            if start.elapsed().as_millis() >= 20 {
+                break;
+            }
         }
-        samples.push(start.elapsed().as_secs_f64() * 1e5);
+        samples.push(start.elapsed().as_secs_f64() * 1e6 / repetitions as f64);
     }
     samples.sort_by(f64::total_cmp);
     println!("{label},{:.3}", samples[3]);
 }
 fn main() {
     println!("kernel,median_microseconds");
-    for n in [8, 32, 64] {
+    for n in [8, 32, 64, 128, 256] {
         let a = Matrix::from_fn(n, n, |r, c| ((r * 17 + c * 13 + 1) as f64).sin());
         let spd = &a.transpose().matmul(&a) + &Matrix::<f64>::identity(n);
         let lu = spd.lu().unwrap();
