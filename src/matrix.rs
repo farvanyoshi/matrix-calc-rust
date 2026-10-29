@@ -1,7 +1,12 @@
+pub(crate) fn checked_size(rows: usize, cols: usize) -> Result<usize, crate::MatrixError> {
+    rows.checked_mul(cols).ok_or(crate::error::ShapeError::Overflow { rows, cols }.into())
+}
+
 use crate::error;
 use num_traits::{One, Zero};
 use std::iter::IntoIterator;
 
+#[must_use]
 #[derive(Debug, Clone, PartialEq)]
 pub struct Matrix<T> {
     rows: usize,
@@ -14,9 +19,10 @@ impl<T> Matrix<T> {
     where
         I: IntoIterator<Item = T>,
     {
+        let len = checked_size(rows, cols)?;
         let data: Vec<T> = input.into_iter().collect();
 
-        if rows * cols != data.len() {
+        if len != data.len() {
             return Err(error::ShapeError::Reshape {
                 exp_rows: rows,
                 exp_cols: cols,
@@ -42,7 +48,7 @@ impl<T> Matrix<T> {
         Self {
             rows,
             cols,
-            data: vec![T::zero(); rows * cols],
+            data: vec![T::zero(); checked_size(rows, cols).expect("matrix dimensions overflow")],
         }
     }
 
@@ -53,7 +59,7 @@ impl<T> Matrix<T> {
         Self {
             rows,
             cols,
-            data: vec![T::one(); rows * cols],
+            data: vec![T::one(); checked_size(rows, cols).expect("matrix dimensions overflow")],
         }
     }
 
@@ -61,7 +67,7 @@ impl<T> Matrix<T> {
     where
         T: Zero + One + Clone,
     {
-        let mut data = vec![T::zero(); side * side];
+        let mut data = vec![T::zero(); checked_size(side, side).expect("matrix dimensions overflow")];
         for i in 0..side {
             data[i * side + i] = T::one();
         }
@@ -86,18 +92,20 @@ impl<T> Matrix<T> {
     }
 
     pub fn len(&self) -> usize {
-        self.rows * self.cols
+        self.data.len()
     }
 
     pub fn is_empty(&self) -> bool {
-        self.len() != 0
+        self.len() == 0
     }
 
     pub fn get(&self, row: usize, col: usize) -> Option<&T> {
+        if row >= self.rows || col >= self.cols { return None; }
         self.data.get(row * self.cols + col)
     }
 
     pub fn get_mut(&mut self, row: usize, col: usize) -> Option<&mut T> {
+        if row >= self.rows || col >= self.cols { return None; }
         self.data.get_mut(row * self.cols + col)
     }
 }
@@ -116,6 +124,9 @@ impl<T> Matrix<T> {
         other: &Matrix<U>,
         f: impl Fn(&T, &U) -> R,
     ) -> Result<Matrix<R>, error::MatrixError> {
+        if self.rows != other.rows || self.cols != other.cols {
+            return Err(error::ShapeError::Dimension { op: "zip", l_rows: self.rows, l_cols: self.cols, r_rows: other.rows, r_cols: other.cols }.into());
+        }
         Matrix::try_new(
             self.iter().zip(other).map(|(a, b)| f(a, b)),
             self.rows,
@@ -164,8 +175,8 @@ impl<'a, T> IntoIterator for &'a mut Matrix<T> {
 }
 
 impl<T> Matrix<T> {
-    pub fn iter_rows(&'_ self) -> std::slice::Chunks<'_, T> {
-        self.data.chunks(self.cols)
+    pub fn iter_rows(&self) -> impl ExactSizeIterator<Item = &[T]> + DoubleEndedIterator {
+        (0..self.rows).map(|r| &self.data[r*self.cols..(r+1)*self.cols])
     }
 
     pub fn iter_col(&self, col: usize) -> impl ExactSizeIterator<Item = &T> + DoubleEndedIterator {
@@ -194,7 +205,7 @@ mod tests {
     #[test]
     #[should_panic]
     fn test_bad_new_matrix() {
-        Matrix::new([2.0, 3.0, 4.0], 4, 5);
+        let _ = Matrix::new([2.0, 3.0, 4.0], 4, 5);
     }
 
     #[test]
@@ -240,7 +251,7 @@ mod tests {
     #[should_panic]
     fn test_bad_map() {
         let m = Matrix::new(0..16, 4, 4);
-        m.map(|x| x / 0);
+        let _ = m.map(|x| x / 0);
     }
 
     #[test]

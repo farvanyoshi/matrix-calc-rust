@@ -2,6 +2,8 @@ use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum ShapeError {
+    #[error("matrix dimensions {rows}x{cols} overflow")]
+    Overflow { rows: usize, cols: usize },
     #[error("Cannot {} matrices of shapes {}x{} and {}x{}", .op, .l_rows, .l_cols, .r_rows, .r_cols)]
     Dimension {
         op: &'static str,
@@ -10,7 +12,7 @@ pub enum ShapeError {
         r_rows: usize,
         r_cols: usize,
     },
-    #[error("Dimensions of {}x{} (total {}) cannot contain {} objects", .exp_rows, .exp_cols, .exp_rows * .exp_cols, .len)]
+    #[error("Dimensions of {}x{} cannot contain {} objects", .exp_rows, .exp_cols, .len)]
     Reshape {
         exp_rows: usize,
         exp_cols: usize,

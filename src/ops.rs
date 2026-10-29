@@ -57,6 +57,9 @@ impl<T: Copy> Matrix<T> {
         T: Div<U>,
         U: Copy + Zero,
     {
+        if self.rows() != other.rows() || self.cols() != other.cols() {
+            return Err(ShapeError::Dimension { op: "element division", l_rows: self.rows(), l_cols: self.cols(), r_rows: other.rows(), r_cols: other.cols() }.into());
+        }
         for x in other {
             if x.is_zero() {
                 return Err(NumericError::DivideByZero.into());
@@ -93,15 +96,16 @@ impl<T: Copy> Matrix<T> {
     pub fn try_scalar_div<S>(&self, scalar: S) -> Result<Matrix<DivResult<T, S>>, MatrixError>
     where
         T: Div<S>,
-        S: Copy,
+        S: Copy + Zero,
     {
+        if scalar.is_zero() { return Err(NumericError::DivideByZero.into()); }
         self.try_map(|x| *x / scalar)
     }
 
     pub fn scalar_div<S>(&self, scalar: S) -> Matrix<DivResult<T, S>>
     where
         T: Div<S>,
-        S: Copy,
+        S: Copy + Zero,
     {
         self.try_scalar_div(scalar)
             .unwrap_or_else(|e| panic!("{e}"))
@@ -128,7 +132,7 @@ impl<T: Copy> Matrix<T> {
         let cols = other.cols();
         let shared = self.cols();
 
-        let mut data = vec![MulResult::<T, U>::zero(); rows * cols];
+        let mut data = vec![MulResult::<T, U>::zero(); crate::matrix::checked_size(rows, cols)?];
 
         for i in 0..rows {
             for k in 0..shared {
@@ -246,12 +250,12 @@ mod tests {
     #[test]
     fn test_element_div_mul() {
         let m = Matrix::new([2; 9], 3, 3);
-        m.hadamard(&Matrix::new(0..9, 3, 3));
-        for (i, j) in m.iter().enumerate() {
+        let product = m.hadamard(&Matrix::new(0..9, 3, 3));
+        for (i, j) in product.iter().enumerate() {
             assert_eq!(i * 2, *j);
         }
 
-        m.el_div(&Matrix::new([1; 9], 3, 3));
+        assert_eq!(m.el_div(&Matrix::new([1; 9], 3, 3)), m);
         let res = m.try_el_div(&Matrix::<usize>::zeros(3, 3));
         assert!(res.is_err());
     }
@@ -259,7 +263,7 @@ mod tests {
     #[test]
     fn test_matmul() {
         let m = Matrix::new(0..24, 8, 3);
-        let n = Matrix::new(-1..-16, 3, 5);
+        let n = Matrix::new((1..=15).map(|x| -x), 3, 5);
         #[rustfmt::skip]
         let exp = Matrix::new(
             [
