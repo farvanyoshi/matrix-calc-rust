@@ -57,10 +57,12 @@ not incorrectly judged against an unrelated local absolute scale.
 Default runtime dependencies are `num-traits` and `thiserror`, plus thiserror's
 Rust procedural-macro dependencies. Optional serde adds Rust-only serialization.
 The numerical oracle and property generator are development-only. The direct
-runtime dependencies declare `MIT OR Apache-2.0`; the repository's own license
-remains unspecified. Cargo emits that metadata warning during packaging; it does
-not prevent local package extraction/build verification. No license was selected
-on the owner's behalf, and no crate publication or remote push was performed.
+runtime dependencies declare `MIT OR Apache-2.0`. Following the owner's decision,
+the repository is also licensed under `MIT OR Apache-2.0`, at the recipient's
+option. Both license texts are included, with copyright attributed to
+farvanyoshi. Cargo package verification was repeated after adding the license
+metadata and no longer reports a missing-license warning. No crate publication
+was performed.
 
 `NUMERICS.md` records algorithm choices and floating-point limitations.
 `BENCHMARKS.md` records the exploratory kernel comparison and final longer-sample

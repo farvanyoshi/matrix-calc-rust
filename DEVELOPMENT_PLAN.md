@@ -416,6 +416,7 @@ and allocation reuse, plus longer steady-state samples through 256×256; the
 strided path keeps the general safe implementation. Six targeted borrowing and
 structural tests also passed under Miri on the isolated 2026-10-29 nightly.
 
-Release validation and exact results are recorded in VALIDATION.md. No remote
-push or crate publication is part of this implementation. The repository has no
-declared license; external publication still requires the owner's license decision.
+Release validation and exact results are recorded in VALIDATION.md. The owner
+subsequently selected dual `MIT OR Apache-2.0` licensing and authorized pushing
+`dev` to the remote. Both license texts and Cargo's SPDX declaration are included.
+Crate publication remains a separate action.

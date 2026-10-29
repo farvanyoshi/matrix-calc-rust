@@ -159,5 +159,11 @@ See [BENCHMARKS.md](BENCHMARKS.md) and [MIGRATION.md](MIGRATION.md).
 
 The completion checklist and algorithm decisions are recorded in
 [DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md). This crate is a library; calculator
-parsing and a REPL are separate work. The repository currently has no declared
-license; a license decision is required before external publication.
+parsing and a REPL are separate work.
+
+## License
+
+Copyright (c) 2026 farvanyoshi <nvnjoshi@outlook.com>.
+
+Licensed under either the [MIT License](LICENSE-MIT) or the
+[Apache License, Version 2.0](LICENSE-APACHE), at your option.

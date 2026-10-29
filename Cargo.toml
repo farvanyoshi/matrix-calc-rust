@@ -6,6 +6,7 @@ rust-version = "1.85"
 description = "Generic dense matrices and real numerical linear algebra"
 repository = "https://github.com/farvanyoshi/matrix-calc-rust"
 readme = "README.md"
+license = "MIT OR Apache-2.0"
 
 [dependencies]
 thiserror = "2"
