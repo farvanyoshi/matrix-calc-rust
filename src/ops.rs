@@ -118,19 +118,9 @@ impl<T: Clone> Matrix<T> {
         T: Mul<U>,
         <T as Mul<U>>::Output: Zero + Clone + AddAssign,
     {
-        if self.cols() != rhs.rows() {
-            return Err(self.dimension_error(rhs, "multiply"));
-        }
-        let mut out = Matrix::try_zeros(self.rows(), rhs.cols())?;
-        for i in 0..self.rows() {
-            for k in 0..self.cols() {
-                for j in 0..rhs.cols() {
-                    out[(i, j)] += self[(i, k)].clone() * rhs[(k, j)].clone();
-                }
-            }
-        }
-        Ok(out)
+        crate::view::multiply(self, rhs)
     }
+
     pub fn matmul<U: Clone>(&self, rhs: &Matrix<U>) -> Matrix<<T as Mul<U>>::Output>
     where
         T: Mul<U>,
