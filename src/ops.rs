@@ -1,238 +1,306 @@
-use crate::error::{MatrixError, NumericError, ShapeError};
-use crate::matrix::Matrix;
+//! Arithmetic. Operators panic on shape/zero-divisor errors; named `try_*`
+//! methods return them. Ordinary element arithmetic retains scalar semantics.
+use crate::Matrix;
+use crate::error::{NumericError, Result};
 use num_traits::{Num, Zero};
-use std::ops::{Add, AddAssign, Div, Index, IndexMut, Mul, Neg, Sub};
+use std::ops::{
+    Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Neg, Sub, SubAssign,
+};
 
-type AddResult<T, U> = <T as Add<U>>::Output;
-type SubResult<T, U> = <T as Sub<U>>::Output;
-type MulResult<T, U> = <T as Mul<U>>::Output;
-type DivResult<T, U> = <T as Div<U>>::Output;
-
-impl<T: Copy> Matrix<T> {
+impl<T: Clone> Matrix<T> {
     pub fn negate(&self) -> Matrix<<T as Neg>::Output>
     where
         T: Neg,
     {
-        self.map(|x| -(*x))
+        self.map(|x| -x.clone())
     }
-
-    pub fn try_add<U: Copy>(
-        &self,
-        other: &Matrix<U>,
-    ) -> Result<Matrix<AddResult<T, U>>, MatrixError>
+    pub fn try_add<U: Clone>(&self, rhs: &Matrix<U>) -> Result<Matrix<<T as Add<U>>::Output>>
     where
         T: Add<U>,
     {
-        self.try_zip_map(other, |a, b| *a + *b)
+        self.try_zip_map(rhs, |a, b| a.clone() + b.clone())
     }
-
-    pub fn try_sub<U: Copy>(
-        &self,
-        other: &Matrix<U>,
-    ) -> Result<Matrix<SubResult<T, U>>, MatrixError>
+    pub fn try_sub<U: Clone>(&self, rhs: &Matrix<U>) -> Result<Matrix<<T as Sub<U>>::Output>>
     where
         T: Sub<U>,
     {
-        self.try_zip_map(other, |a, b| *a - *b)
+        self.try_zip_map(rhs, |a, b| a.clone() - b.clone())
     }
-
-    pub fn try_hadamard<U>(&self, other: &Matrix<U>) -> Result<Matrix<MulResult<T, U>>, MatrixError>
+    pub fn try_hadamard<U: Clone>(&self, rhs: &Matrix<U>) -> Result<Matrix<<T as Mul<U>>::Output>>
     where
         T: Mul<U>,
-        U: Copy,
     {
-        self.try_zip_map(other, |a, b| *a * *b)
+        self.try_zip_map(rhs, |a, b| a.clone() * b.clone())
     }
-
-    pub fn hadamard<U>(&self, other: &Matrix<U>) -> Matrix<MulResult<T, U>>
+    pub fn hadamard<U: Clone>(&self, rhs: &Matrix<U>) -> Matrix<<T as Mul<U>>::Output>
     where
         T: Mul<U>,
-        U: Copy,
     {
-        self.try_hadamard(other).unwrap_or_else(|e| panic!("{e}"))
+        self.try_hadamard(rhs).expect("incompatible matrix shapes")
     }
-
-    pub fn try_el_div<U>(&self, other: &Matrix<U>) -> Result<Matrix<DivResult<T, U>>, MatrixError>
+    pub fn try_element_div<U: Clone + Zero>(
+        &self,
+        rhs: &Matrix<U>,
+    ) -> Result<Matrix<<T as Div<U>>::Output>>
     where
         T: Div<U>,
-        U: Copy + Zero,
     {
-        if self.rows() != other.rows() || self.cols() != other.cols() {
-            return Err(ShapeError::Dimension { op: "element division", l_rows: self.rows(), l_cols: self.cols(), r_rows: other.rows(), r_cols: other.cols() }.into());
+        self.same_shape(rhs, "element division")?;
+        if rhs.iter().any(Zero::is_zero) {
+            return Err(NumericError::DivideByZero.into());
         }
-        for x in other {
-            if x.is_zero() {
-                return Err(NumericError::DivideByZero.into());
-            }
-        }
-        self.try_zip_map(other, |a, b| *a / *b)
+        self.try_zip_map(rhs, |a, b| a.clone() / b.clone())
     }
-
-    pub fn el_div<U>(&self, other: &Matrix<U>) -> Matrix<DivResult<T, U>>
+    pub fn element_div<U: Clone + Zero>(&self, rhs: &Matrix<U>) -> Matrix<<T as Div<U>>::Output>
     where
         T: Div<U>,
-        U: Copy + Zero,
     {
-        self.try_el_div(other).unwrap_or_else(|e| panic!("{e}"))
+        self.try_element_div(rhs).expect("invalid element division")
     }
-
-    pub fn try_scalar_mul<S>(&self, scalar: S) -> Result<Matrix<MulResult<T, S>>, MatrixError>
+    /// Compatibility alias for [`Self::try_element_div`].
+    pub fn try_el_div<U: Clone + Zero>(
+        &self,
+        rhs: &Matrix<U>,
+    ) -> Result<Matrix<<T as Div<U>>::Output>>
+    where
+        T: Div<U>,
+    {
+        self.try_element_div(rhs)
+    }
+    pub fn el_div<U: Clone + Zero>(&self, rhs: &Matrix<U>) -> Matrix<<T as Div<U>>::Output>
+    where
+        T: Div<U>,
+    {
+        self.element_div(rhs)
+    }
+    pub fn scalar_add<S: Clone>(&self, x: S) -> Matrix<<T as Add<S>>::Output>
+    where
+        T: Add<S>,
+    {
+        self.map(|a| a.clone() + x.clone())
+    }
+    pub fn scalar_sub<S: Clone>(&self, x: S) -> Matrix<<T as Sub<S>>::Output>
+    where
+        T: Sub<S>,
+    {
+        self.map(|a| a.clone() - x.clone())
+    }
+    pub fn scalar_mul<S: Clone>(&self, x: S) -> Matrix<<T as Mul<S>>::Output>
     where
         T: Mul<S>,
-        S: Copy,
     {
-        self.try_map(|x| *x * scalar)
+        self.map(|a| a.clone() * x.clone())
     }
-
-    pub fn scalar_mul<S>(&self, scalar: S) -> Matrix<MulResult<T, S>>
+    /// Compatibility wrapper. Numeric overflow is checked by `checked_scalar_mul`.
+    pub fn try_scalar_mul<S: Clone>(&self, x: S) -> Result<Matrix<<T as Mul<S>>::Output>>
     where
         T: Mul<S>,
-        S: Copy,
     {
-        self.try_scalar_mul(scalar)
-            .unwrap_or_else(|e| panic!("{e}"))
+        Ok(self.scalar_mul(x))
     }
-
-    pub fn try_scalar_div<S>(&self, scalar: S) -> Result<Matrix<DivResult<T, S>>, MatrixError>
+    pub fn try_scalar_div<S: Clone + Zero>(&self, x: S) -> Result<Matrix<<T as Div<S>>::Output>>
     where
         T: Div<S>,
-        S: Copy + Zero,
     {
-        if scalar.is_zero() { return Err(NumericError::DivideByZero.into()); }
-        self.try_map(|x| *x / scalar)
+        if x.is_zero() {
+            return Err(NumericError::DivideByZero.into());
+        }
+        Ok(self.map(|a| a.clone() / x.clone()))
     }
-
-    pub fn scalar_div<S>(&self, scalar: S) -> Matrix<DivResult<T, S>>
+    pub fn scalar_div<S: Clone + Zero>(&self, x: S) -> Matrix<<T as Div<S>>::Output>
     where
         T: Div<S>,
-        S: Copy + Zero,
     {
-        self.try_scalar_div(scalar)
-            .unwrap_or_else(|e| panic!("{e}"))
+        self.try_scalar_div(x).expect("invalid scalar division")
     }
-
-    pub fn try_matmul<U>(&self, other: &Matrix<U>) -> Result<Matrix<MulResult<T, U>>, MatrixError>
+    pub fn try_matmul<U: Clone>(&self, rhs: &Matrix<U>) -> Result<Matrix<<T as Mul<U>>::Output>>
     where
         T: Mul<U>,
-        U: Copy,
-        MulResult<T, U>: Zero + Copy + AddAssign,
+        <T as Mul<U>>::Output: Zero + Clone + AddAssign,
     {
-        if self.cols() != other.rows() {
-            return Err(ShapeError::Dimension {
-                op: "matrix multiply",
-                l_rows: self.rows(),
-                l_cols: self.cols(),
-                r_rows: other.rows(),
-                r_cols: other.cols(),
-            }
-            .into());
+        if self.cols() != rhs.rows() {
+            return Err(self.dimension_error(rhs, "multiply"));
         }
-
-        let rows = self.rows();
-        let cols = other.cols();
-        let shared = self.cols();
-
-        let mut data = vec![MulResult::<T, U>::zero(); crate::matrix::checked_size(rows, cols)?];
-
-        for i in 0..rows {
-            for k in 0..shared {
-                let a = self.data()[i * shared + k];
-                for j in 0..cols {
-                    data[i * cols + j] += a * other.data()[k * cols + j];
+        let mut out = Matrix::try_zeros(self.rows(), rhs.cols())?;
+        for i in 0..self.rows() {
+            for k in 0..self.cols() {
+                for j in 0..rhs.cols() {
+                    out[(i, j)] += self[(i, k)].clone() * rhs[(k, j)].clone();
                 }
             }
         }
-
-        Matrix::try_new(data, rows, cols)
+        Ok(out)
     }
-
-    pub fn matmul<U>(&self, other: &Matrix<U>) -> Matrix<MulResult<T, U>>
+    pub fn matmul<U: Clone>(&self, rhs: &Matrix<U>) -> Matrix<<T as Mul<U>>::Output>
     where
         T: Mul<U>,
-        U: Copy,
-        MulResult<T, U>: Zero + Copy + AddAssign,
+        <T as Mul<U>>::Output: Zero + Clone + AddAssign,
     {
-        self.try_matmul(other).unwrap_or_else(|e| panic!("{e}"))
+        self.try_matmul(rhs).expect("invalid matrix multiplication")
+    }
+    /// Compute into a pre-sized output, validating all shapes before writing.
+    pub fn matmul_into(&self, rhs: &Self, out: &mut Self) -> Result<()>
+    where
+        T: Mul<Output = T> + Zero + AddAssign,
+    {
+        if out.shape() != (self.rows(), rhs.cols()) {
+            return Err(out.dimension_error(self, "write multiplication output"));
+        }
+        let result = self.try_matmul(rhs)?;
+        *out = result;
+        Ok(())
     }
 }
-
-impl<T, U> Add<&Matrix<U>> for &Matrix<T>
-where
-    T: Copy + Add<U>,
-    U: Copy,
-{
-    type Output = Matrix<AddResult<T, U>>;
-
-    fn add(self, rhs: &Matrix<U>) -> Self::Output {
-        self.try_add(rhs).unwrap()
+macro_rules! binary {
+    ($trait:ident,$method:ident,$try_method:ident) => {
+        impl<T: Clone + std::ops::$trait<U>, U: Clone> std::ops::$trait<&Matrix<U>> for &Matrix<T> {
+            type Output = Matrix<<T as std::ops::$trait<U>>::Output>;
+            fn $method(self, rhs: &Matrix<U>) -> Self::Output {
+                self.$try_method(rhs).expect("incompatible matrix shapes")
+            }
+        }
+        impl<T: Clone + std::ops::$trait<U>, U: Clone> std::ops::$trait<Matrix<U>> for Matrix<T> {
+            type Output = Matrix<<T as std::ops::$trait<U>>::Output>;
+            fn $method(self, rhs: Matrix<U>) -> Self::Output {
+                (&self).$method(&rhs)
+            }
+        }
+        impl<T: Clone + std::ops::$trait<U>, U: Clone> std::ops::$trait<&Matrix<U>> for Matrix<T> {
+            type Output = Matrix<<T as std::ops::$trait<U>>::Output>;
+            fn $method(self, rhs: &Matrix<U>) -> Self::Output {
+                (&self).$method(rhs)
+            }
+        }
+        impl<T: Clone + std::ops::$trait<U>, U: Clone> std::ops::$trait<Matrix<U>> for &Matrix<T> {
+            type Output = Matrix<<T as std::ops::$trait<U>>::Output>;
+            fn $method(self, rhs: Matrix<U>) -> Self::Output {
+                self.$method(&rhs)
+            }
+        }
+    };
+}
+binary!(Add, add, try_add);
+binary!(Sub, sub, try_sub);
+impl<T: Clone + Neg> Neg for &Matrix<T> {
+    type Output = Matrix<T::Output>;
+    fn neg(self) -> Self::Output {
+        self.negate()
     }
 }
-
-impl<T, U> Sub<&Matrix<U>> for &Matrix<T>
-where
-    T: Copy + Sub<U>,
-    U: Copy,
-{
-    type Output = Matrix<SubResult<T, U>>;
-
-    fn sub(self, rhs: &Matrix<U>) -> Self::Output {
-        self.try_sub(rhs).unwrap()
+impl<T: Neg> Neg for Matrix<T> {
+    type Output = Matrix<T::Output>;
+    fn neg(self) -> Self::Output {
+        Matrix {
+            rows: self.rows,
+            cols: self.cols,
+            data: self.data.into_iter().map(Neg::neg).collect(),
+        }
     }
 }
-
-impl<T, S> Mul<S> for &Matrix<T>
+impl<T: Clone + Mul<U>, U: Clone> Mul<&Matrix<U>> for &Matrix<T>
 where
-    T: Copy + Mul<S>,
-    S: Copy + Num,
-    MulResult<T, S>: Copy,
+    T::Output: Zero + Clone + AddAssign,
 {
-    type Output = Matrix<MulResult<T, S>>;
-
-    fn mul(self, rhs: S) -> Self::Output {
-        self.scalar_mul(rhs)
-    }
-}
-
-impl<T, S> Div<S> for &Matrix<T>
-where
-    T: Copy + Div<S>,
-    S: Copy + Num,
-    DivResult<T, S>: Copy,
-{
-    type Output = Matrix<DivResult<T, S>>;
-
-    fn div(self, rhs: S) -> Self::Output {
-        self.scalar_div(rhs)
-    }
-}
-
-impl<T, U> Mul<&Matrix<U>> for &Matrix<T>
-where
-    T: Copy + Mul<U>,
-    U: Copy,
-    MulResult<T, U>: Zero + Copy + AddAssign,
-{
-    type Output = Matrix<MulResult<T, U>>;
-
+    type Output = Matrix<T::Output>;
     fn mul(self, rhs: &Matrix<U>) -> Self::Output {
         self.matmul(rhs)
     }
 }
-
+impl<T: Clone + Mul<U>, U: Clone> Mul<Matrix<U>> for Matrix<T>
+where
+    T::Output: Zero + Clone + AddAssign,
+{
+    type Output = Matrix<T::Output>;
+    fn mul(self, rhs: Matrix<U>) -> Self::Output {
+        self.matmul(&rhs)
+    }
+}
+impl<T: Clone + Mul<U>, U: Clone> Mul<&Matrix<U>> for Matrix<T>
+where
+    T::Output: Zero + Clone + AddAssign,
+{
+    type Output = Matrix<T::Output>;
+    fn mul(self, rhs: &Matrix<U>) -> Self::Output {
+        self.matmul(rhs)
+    }
+}
+impl<T: Clone + Mul<U>, U: Clone> Mul<Matrix<U>> for &Matrix<T>
+where
+    T::Output: Zero + Clone + AddAssign,
+{
+    type Output = Matrix<T::Output>;
+    fn mul(self, rhs: Matrix<U>) -> Self::Output {
+        self.matmul(&rhs)
+    }
+}
+impl<T: Clone + Mul<S>, S: Num + Clone> Mul<S> for &Matrix<T> {
+    type Output = Matrix<T::Output>;
+    fn mul(self, rhs: S) -> Self::Output {
+        self.scalar_mul(rhs)
+    }
+}
+impl<T: Clone + Mul<S>, S: Num + Clone> Mul<S> for Matrix<T> {
+    type Output = Matrix<T::Output>;
+    fn mul(self, rhs: S) -> Self::Output {
+        self.scalar_mul(rhs)
+    }
+}
+impl<T: Clone + Div<S>, S: Num + Clone> Div<S> for &Matrix<T> {
+    type Output = Matrix<T::Output>;
+    fn div(self, rhs: S) -> Self::Output {
+        self.scalar_div(rhs)
+    }
+}
+impl<T: Clone + Div<S>, S: Num + Clone> Div<S> for Matrix<T> {
+    type Output = Matrix<T::Output>;
+    fn div(self, rhs: S) -> Self::Output {
+        self.scalar_div(rhs)
+    }
+}
+impl<T: Clone + Add<Output = T>> AddAssign<&Matrix<T>> for Matrix<T> {
+    fn add_assign(&mut self, rhs: &Matrix<T>) {
+        self.same_shape(rhs, "add assign")
+            .expect("incompatible matrix shapes");
+        for (a, b) in self.data.iter_mut().zip(&rhs.data) {
+            *a = a.clone() + b.clone();
+        }
+    }
+}
+impl<T: Clone + Sub<Output = T>> SubAssign<&Matrix<T>> for Matrix<T> {
+    fn sub_assign(&mut self, rhs: &Matrix<T>) {
+        self.same_shape(rhs, "subtract assign")
+            .expect("incompatible matrix shapes");
+        for (a, b) in self.data.iter_mut().zip(&rhs.data) {
+            *a = a.clone() - b.clone();
+        }
+    }
+}
+impl<T: Clone + Mul<Output = T> + Num> MulAssign<T> for Matrix<T> {
+    fn mul_assign(&mut self, rhs: T) {
+        for a in &mut self.data {
+            *a = a.clone() * rhs.clone();
+        }
+    }
+}
+impl<T: Clone + Div<Output = T> + Num> DivAssign<T> for Matrix<T> {
+    fn div_assign(&mut self, rhs: T) {
+        assert!(!rhs.is_zero(), "cannot divide by zero");
+        for a in &mut self.data {
+            *a = a.clone() / rhs.clone();
+        }
+    }
+}
 impl<T> Index<(usize, usize)> for Matrix<T> {
     type Output = T;
-
-    fn index(&self, (row, col): (usize, usize)) -> &Self::Output {
-        self.get(row, col).unwrap()
+    fn index(&self, (r, c): (usize, usize)) -> &T {
+        self.get(r, c).expect("matrix coordinate out of bounds")
     }
 }
-
 impl<T> IndexMut<(usize, usize)> for Matrix<T> {
-    fn index_mut(&mut self, (row, col): (usize, usize)) -> &mut Self::Output {
-        self.get_mut(row, col).unwrap()
+    fn index_mut(&mut self, (r, c): (usize, usize)) -> &mut T {
+        self.get_mut(r, c).expect("matrix coordinate out of bounds")
     }
 }
-
 #[cfg(test)]
 mod tests {
     use super::*;
