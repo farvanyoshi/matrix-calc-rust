@@ -13,3 +13,5 @@ pub mod numeric;
 pub use numeric::{DecompositionOptions, Real, Tolerance};
 pub mod linalg;
 pub use linalg::{Cholesky, Lu};
+
+pub use linalg::Qr;

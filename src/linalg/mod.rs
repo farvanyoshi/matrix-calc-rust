@@ -2,12 +2,14 @@
 //! or inverse-based solves are used. Factor conventions are documented on types.
 mod cholesky;
 mod lu;
+mod qr;
 use crate::{
     DecompositionOptions, Matrix, Real,
     error::{NumericError, Result},
 };
 pub use cholesky::Cholesky;
 pub use lu::Lu;
+pub use qr::Qr;
 
 pub(crate) fn normalized<T: Real>(a: &Matrix<T>) -> Result<(Matrix<T>, T)> {
     a.finite()?;
@@ -57,6 +59,15 @@ impl<T: Real> Matrix<T> {
     }
     pub fn cholesky_with_options(&self, options: DecompositionOptions<T>) -> Result<Cholesky<T>> {
         Cholesky::decompose(self, options)
+    }
+    pub fn qr(&self) -> Result<Qr<T>> {
+        Qr::decompose(self, false, DecompositionOptions::default())
+    }
+    pub fn pivoted_qr(&self) -> Result<Qr<T>> {
+        Qr::decompose(self, true, DecompositionOptions::default())
+    }
+    pub fn qr_with_options(&self, pivot: bool, options: DecompositionOptions<T>) -> Result<Qr<T>> {
+        Qr::decompose(self, pivot, options)
     }
     pub fn powi(&self, power: i32) -> Result<Self> {
         if power < 0 {
