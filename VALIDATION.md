@@ -16,7 +16,7 @@ executed checks; hosted CI and ARM runtime execution are not claimed.
 | Cross-language / independent NumPy | 114 cases passed, NumPy 2.3.5 |
 | Rust Miri | 10 Tensor/Vector tests + 1 explicit scalar-dispatch test passed |
 | Rust AddressSanitizer | Accelerated, Tensor and Vector suites passed |
-| Nim AddressSanitizer + UndefinedBehaviorSanitizer | Accelerated task/FFI kernel checks passed |
+| Nim AddressSanitizer + UndefinedBehaviorSanitizer | Unoptimized goto and optimized setjmp exception builds passed; optimized goto/GCC 14.2 reports a generated exception-flag diagnostic (see Nim VALIDATION.md) |
 | Scalar fallback | Rust Miri dispatch and Nim forced scalar/threads-off execution passed |
 | Architecture checks | AVX executed on host; Rust NEON/AArch64 compile-check passed |
 | REPL integration | Piped matrix, variable, syntax-error recovery and subsequent sum executed in both languages |
@@ -45,6 +45,6 @@ No package registry publication is part of these checks.
 
 ## Rust packaging
 
-`cargo package --list` and extracted-archive build verification are rerun after
-the final commit. Runtime dependencies are Rust-only; Criterion, the independent
+`cargo package --list` and extracted-archive build verification passed for 0.3.0
+(68 packaged files). Runtime dependencies are Rust-only; Criterion, the independent
 numerical oracle and property generator are development dependencies.

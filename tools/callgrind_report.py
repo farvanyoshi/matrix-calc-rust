@@ -39,7 +39,7 @@ def main():
     rows=[dict(function=names.get(key,f'function #{key}'),self_instructions=value,fraction=value/total if total else 0)for key,value in costs.most_common()]
     (out/'summary.json').write_text(json.dumps(dict(source=source.name,measurement='Callgrind instruction events; not wall-clock CPU samples',events=dict(zip(events,summary)),self_cost_sum=total,summary_instructions=measured,functions=rows),indent=2)+'\n')
     with(out/'functions.csv').open('w',newline='')as f:
-        writer=csv.DictWriter(f,fieldnames=['function','self_instructions','fraction']);writer.writeheader();writer.writerows(rows)
+        writer=csv.DictWriter(f,fieldnames=['function','self_instructions','fraction'],lineterminator='\n');writer.writeheader();writer.writerows(rows)
     # A two-level flame-style chart is deliberately flat: no nonexistent stack
     # ancestry is inferred from aggregate callgraph edges.
     width=1400;left=20;usable=width-40;parts=[f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="205" viewBox="0 0 {width} 205">', '<rect width="100%" height="100%" fill="white"/>','<style>text{font-family:monospace;font-size:12px} .title{font-size:17px;font-weight:bold}</style>', '<text x="20" y="27" class="title">Callgrind instruction-attribution flame chart (flat self-cost)</text>','<text x="20" y="52">Widths are executed instruction counts, not CPU time or inferred call stacks.</text>']
