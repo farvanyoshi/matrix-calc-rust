@@ -5,6 +5,10 @@ strided n-dimensional tensors, and real-valued numerical linear algebra. Matrice
 consistent through the safe public API. The numerical layer supports `f32` and
 `f64`. Rust 1.85 or newer is required.
 
+The companion [Nim implementation](https://github.com/farvanyoshi/matrix-calc-nim)
+provides similar functionality. See [roadmap coverage](docs/ROADMAP.md) and
+[verification results and limitations](VALIDATION.md) for this version.
+
 ## Vectors and n-dimensional tensors
 
 ```rust
