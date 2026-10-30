@@ -19,6 +19,7 @@ pub struct Svd<T> {
 }
 impl<T: Real> Svd<T> {
     /// Compute this factorization with explicit numerical options; reject invalid input and exhausted iteration.
+    /// Shape requirements: finite M×N input.
     pub fn decompose(a: &Matrix<T>, options: DecompositionOptions<T>) -> Result<Self> {
         let tol = options.resolve(a.rows().max(a.cols()))?;
         if a.rows() < a.cols() {
@@ -160,22 +161,27 @@ impl<T: Real> Svd<T> {
         })
     }
     /// Economy left singular vectors as orthonormal columns.
+    /// Shape requirements: any valid stored layout; additional operand restrictions are documented above.
     pub fn u(&self) -> &Matrix<T> {
         &self.u
     }
     /// Transposed economy right singular vectors as orthonormal rows.
+    /// Shape requirements: any valid stored layout; additional operand restrictions are documented above.
     pub fn v_t(&self) -> &Matrix<T> {
         &self.v_t
     }
     /// Descending nonnegative singular values in original input units.
+    /// Shape requirements: any valid stored layout; additional operand restrictions are documented above.
     pub fn singular_values(&self) -> &[T] {
         &self.values
     }
     /// Number of complete pair sweeps used to certify convergence.
+    /// Shape requirements: any valid stored layout; additional operand restrictions are documented above.
     pub fn sweeps(&self) -> usize {
         self.sweeps
     }
     /// Numerical rank from singular values above the selected threshold.
+    /// Shape requirements: any finite M×N input or its retained factorization.
     pub fn rank(&self) -> usize {
         self.scaled_values
             .iter()
@@ -183,10 +189,12 @@ impl<T: Real> Svd<T> {
             .count()
     }
     /// Largest singular value, or zero for an empty spectrum.
+    /// Shape requirements: any valid stored layout; additional operand restrictions are documented above.
     pub fn spectral_norm(&self) -> T {
         self.values.first().copied().unwrap_or(T::zero())
     }
     /// Empty matrices have condition number 1; numerically singular matrices infinity.
+    /// Shape requirements: any finite M×N input or retained SVD.
     pub fn condition_number(&self) -> T {
         if self.values.is_empty() {
             T::one()
@@ -197,6 +205,7 @@ impl<T: Real> Svd<T> {
         }
     }
     /// Compute a tolerance-truncated Moore–Penrose pseudoinverse using SVD.
+    /// Shape requirements: finite M×N input produces an N×M output.
     pub fn pseudoinverse(&self) -> Result<Matrix<T>> {
         let out = Matrix::try_from_fn(self.v_t.cols(), self.u.rows(), |r, c| {
             compensated(
@@ -216,6 +225,7 @@ impl<T: Real> Svd<T> {
         Ok(out)
     }
     /// Minimum-norm least squares using only singular values above the threshold.
+    /// Shape requirements: retained A=M×N and B=M×K; output is minimum-norm N×K.
     pub fn solve(&self, b: &Matrix<T>) -> Result<Matrix<T>> {
         rhs(self.u.rows(), b)?;
         let bscale = if b.max_abs() == T::zero() {

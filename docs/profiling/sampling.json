@@ -1,0 +1,9 @@
+{
+  "measurement": "actual GDB/MI main-thread interrupt samples",
+  "samples": 319,
+  "unique_stacks": 3,
+  "interval_seconds": 0.02,
+  "command": [
+    "/workspace/.setup/build/rust/release/deps/roadmap-54e83fe05326df48"
+  ]
+}

@@ -1,5 +1,5 @@
 #![doc = include_str!("../README.md")]
-#![forbid(unsafe_code)]
+#![deny(unsafe_code)]
 #![warn(missing_docs)]
 
 pub mod error;
@@ -25,3 +25,12 @@ pub use linalg::{Svd, SymmetricEigen};
 
 #[cfg(feature = "serde")]
 mod serialization;
+
+#[allow(unsafe_code)]
+pub mod accelerated;
+
+pub mod tensor;
+pub mod vector;
+pub use tensor::{Tensor, TensorError};
+pub use vector::Vector;
+pub mod repl;

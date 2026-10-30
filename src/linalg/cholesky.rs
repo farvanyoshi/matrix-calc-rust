@@ -12,6 +12,7 @@ pub struct Cholesky<T> {
 }
 impl<T: Real> Cholesky<T> {
     /// Compute this factorization with explicit numerical options; reject invalid input and exhausted iteration.
+    /// Shape requirements: finite symmetric positive-definite N×N input.
     pub fn decompose(a: &Matrix<T>, options: DecompositionOptions<T>) -> Result<Self> {
         let n = a.square()?;
         let tol = options.resolve(n)?;
@@ -44,10 +45,12 @@ impl<T: Real> Cholesky<T> {
         Ok(Self { lower: l, scale })
     }
     /// Allocate the lower factor in the original input units/convention.
+    /// Shape requirements: any valid stored layout; additional operand restrictions are documented above.
     pub fn lower(&self) -> Matrix<T> {
         self.lower.scalar_mul(self.scale.sqrt())
     }
     /// Solve using the retained factors; finite RHS dimensions must match the original input.
+    /// Shape requirements: retained A=N×N and B=N×K; A is numerically nonsingular.
     pub fn solve(&self, b: &Matrix<T>) -> Result<Matrix<T>> {
         let n = self.lower.rows();
         rhs(n, b)?;
@@ -74,12 +77,14 @@ impl<T: Real> Cholesky<T> {
         Ok(x)
     }
     /// Log determinant of the retained positive-definite Cholesky factors.
+    /// Shape requirements: any valid stored layout; additional operand restrictions are documented above.
     pub fn log_determinant(&self) -> T {
         number::<T>(self.lower.rows()) * self.scale.ln()
             + number::<T>(2)
                 * (0..self.lower.rows()).fold(T::zero(), |s, i| s + self.lower[(i, i)].ln())
     }
     /// Compute a square determinant; its magnitude can underflow or overflow.
+    /// Shape requirements: input is finite N×N.
     pub fn determinant(&self) -> T {
         self.log_determinant().exp()
     }

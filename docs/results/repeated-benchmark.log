@@ -1,0 +1,128 @@
+   Compiling matrix-calc v0.2.0 (/workspace/matrix-calc-rust)
+    Finished `bench` profile [optimized] target(s) in 5.59s
+     Running benches/roadmap.rs (/workspace/.setup/build/rust/release/deps/roadmap-5f35e5da4b3d9742)
+Rust backend: avx; rayon threads: 4
+language,kernel,size,seconds,checksum,max_error
+Gnuplot not found, using plotters backend
+rust,naive,128,0.006566366,-477.980468750000,0
+rust,blocked,128,0.000542168,-477.980468750000,0.000000000000
+rust,parallel,128,0.000459183,-477.980468750000,0.000000000000
+rust,simd,128,0.000377990,-477.980468750000,0.000000000000
+Benchmarking roadmap_matmul/naive/128
+Benchmarking roadmap_matmul/naive/128: Warming up for 100.00 ms
+Benchmarking roadmap_matmul/naive/128: Collecting 10 samples in estimated 202.44 ms (30 iterations)
+Benchmarking roadmap_matmul/naive/128: Analyzing
+roadmap_matmul/naive/128
+                        time:   [7.3304 ms 7.5134 ms 7.6951 ms]
+Benchmarking roadmap_matmul/blocked/128
+Benchmarking roadmap_matmul/blocked/128: Warming up for 100.00 ms
+Benchmarking roadmap_matmul/blocked/128: Collecting 10 samples in estimated 200.29 ms (460 iterations)
+Benchmarking roadmap_matmul/blocked/128: Analyzing
+roadmap_matmul/blocked/128
+                        time:   [423.09 µs 426.18 µs 429.05 µs]
+Benchmarking roadmap_matmul/parallel/128
+Benchmarking roadmap_matmul/parallel/128: Warming up for 100.00 ms
+Benchmarking roadmap_matmul/parallel/128: Collecting 10 samples in estimated 201.68 ms (810 iterations)
+Benchmarking roadmap_matmul/parallel/128: Analyzing
+roadmap_matmul/parallel/128
+                        time:   [260.02 µs 282.56 µs 303.58 µs]
+Benchmarking roadmap_matmul/simd/128
+Benchmarking roadmap_matmul/simd/128: Warming up for 100.00 ms
+Benchmarking roadmap_matmul/simd/128: Collecting 10 samples in estimated 200.19 ms (650 iterations)
+Benchmarking roadmap_matmul/simd/128: Analyzing
+roadmap_matmul/simd/128 time:   [280.93 µs 283.16 µs 285.53 µs]
+
+rust,naive,512,0.533776378,1357.355468750000,0
+rust,blocked,512,0.032545985,1357.355468750000,0.000000000000
+rust,parallel,512,0.013051069,1357.355468750000,0.000000000000
+rust,simd,512,0.019768038,1357.355468750000,0.000000000000
+Benchmarking roadmap_matmul/naive/512
+Benchmarking roadmap_matmul/naive/512: Warming up for 100.00 ms
+
+Warning: Unable to complete 10 samples in 200.0ms. You may wish to increase target time to 5.1s.
+Benchmarking roadmap_matmul/naive/512: Collecting 10 samples in estimated 5.0585 s (10 iterations)
+Benchmarking roadmap_matmul/naive/512: Analyzing
+roadmap_matmul/naive/512
+                        time:   [506.67 ms 518.31 ms 530.64 ms]
+Benchmarking roadmap_matmul/blocked/512
+Benchmarking roadmap_matmul/blocked/512: Warming up for 100.00 ms
+
+Warning: Unable to complete 10 samples in 200.0ms. You may wish to increase target time to 317.0ms.
+Benchmarking roadmap_matmul/blocked/512: Collecting 10 samples in estimated 316.98 ms (10 iterations)
+Benchmarking roadmap_matmul/blocked/512: Analyzing
+roadmap_matmul/blocked/512
+                        time:   [30.323 ms 31.130 ms 31.999 ms]
+Benchmarking roadmap_matmul/parallel/512
+Benchmarking roadmap_matmul/parallel/512: Warming up for 100.00 ms
+Benchmarking roadmap_matmul/parallel/512: Collecting 10 samples in estimated 290.68 ms (30 iterations)
+Benchmarking roadmap_matmul/parallel/512: Analyzing
+roadmap_matmul/parallel/512
+                        time:   [8.9798 ms 9.7990 ms 10.728 ms]
+Found 1 outliers among 10 measurements (10.00%)
+  1 (10.00%) high mild
+Benchmarking roadmap_matmul/simd/512
+Benchmarking roadmap_matmul/simd/512: Warming up for 100.00 ms
+
+Warning: Unable to complete 10 samples in 200.0ms. You may wish to increase target time to 219.3ms.
+Benchmarking roadmap_matmul/simd/512: Collecting 10 samples in estimated 219.26 ms (10 iterations)
+Benchmarking roadmap_matmul/simd/512: Analyzing
+roadmap_matmul/simd/512 time:   [21.055 ms 21.237 ms 21.429 ms]
+
+rust,naive,1024,4.310165503,-0.902343750000,0
+rust,blocked,1024,0.271704162,-0.902343750000,0.000000000000
+rust,parallel,1024,0.084271820,-0.902343750000,0.000000000000
+rust,simd,1024,0.174189103,-0.902343750000,0.000000000000
+Benchmarking roadmap_matmul/naive/1024
+Benchmarking roadmap_matmul/naive/1024: Warming up for 100.00 ms
+
+Warning: Unable to complete 10 samples in 200.0ms. You may wish to increase target time to 42.5s.
+Benchmarking roadmap_matmul/naive/1024: Collecting 10 samples in estimated 42.469 s (10 iterations)
+Benchmarking roadmap_matmul/naive/1024: Analyzing
+roadmap_matmul/naive/1024
+                        time:   [4.1122 s 4.1883 s 4.2741 s]
+Found 1 outliers among 10 measurements (10.00%)
+  1 (10.00%) high mild
+Benchmarking roadmap_matmul/blocked/1024
+Benchmarking roadmap_matmul/blocked/1024: Warming up for 100.00 ms
+
+Warning: Unable to complete 10 samples in 200.0ms. You may wish to increase target time to 2.6s.
+Benchmarking roadmap_matmul/blocked/1024: Collecting 10 samples in estimated 2.5868 s (10 iterations)
+Benchmarking roadmap_matmul/blocked/1024: Analyzing
+roadmap_matmul/blocked/1024
+                        time:   [237.83 ms 242.35 ms 247.35 ms]
+Found 2 outliers among 10 measurements (20.00%)
+  1 (10.00%) low mild
+  1 (10.00%) high severe
+Benchmarking roadmap_matmul/parallel/1024
+Benchmarking roadmap_matmul/parallel/1024: Warming up for 100.00 ms
+
+Warning: Unable to complete 10 samples in 200.0ms. You may wish to increase target time to 727.4ms.
+Benchmarking roadmap_matmul/parallel/1024: Collecting 10 samples in estimated 727.36 ms (10 iterations)
+Benchmarking roadmap_matmul/parallel/1024: Analyzing
+roadmap_matmul/parallel/1024
+                        time:   [64.949 ms 70.770 ms 77.232 ms]
+Benchmarking roadmap_matmul/simd/1024
+Benchmarking roadmap_matmul/simd/1024: Warming up for 100.00 ms
+
+Warning: Unable to complete 10 samples in 200.0ms. You may wish to increase target time to 2.1s.
+Benchmarking roadmap_matmul/simd/1024: Collecting 10 samples in estimated 2.0631 s (10 iterations)
+Benchmarking roadmap_matmul/simd/1024: Analyzing
+roadmap_matmul/simd/1024
+                        time:   [173.65 ms 175.78 ms 178.34 ms]
+Found 1 outliers among 10 measurements (10.00%)
+  1 (10.00%) high mild
+
+rust,dot_scalar,1048576,0.001183545,-14.909179687500,0.000000000000
+Benchmarking dot_scalar
+Benchmarking dot_scalar: Warming up for 100.00 ms
+Benchmarking dot_scalar: Collecting 10 samples in estimated 229.61 ms (220 iterations)
+Benchmarking dot_scalar: Analyzing
+dot_scalar              time:   [952.72 µs 975.95 µs 992.96 µs]
+
+rust,dot_simd,1048576,0.000723832,-14.909179687500,0.000000000000
+Benchmarking dot_simd
+Benchmarking dot_simd: Warming up for 100.00 ms
+Benchmarking dot_simd: Collecting 10 samples in estimated 202.12 ms (660 iterations)
+Benchmarking dot_simd: Analyzing
+dot_simd                time:   [257.52 µs 264.26 µs 274.62 µs]
+

@@ -1,0 +1,117 @@
+{
+  "measurement": "single timed verification run, not a confidence interval",
+  "comparisons": [
+    {
+      "kernel": "blocked",
+      "size": 128,
+      "rust_seconds": 0.000542168,
+      "nim_seconds": 0.002365858,
+      "nim_over_rust": 4.363699074825516,
+      "checksum": -477.98046875
+    },
+    {
+      "kernel": "naive",
+      "size": 128,
+      "rust_seconds": 0.006566366,
+      "nim_seconds": 0.009297892,
+      "nim_over_rust": 1.4159874731320186,
+      "checksum": -477.98046875
+    },
+    {
+      "kernel": "parallel",
+      "size": 128,
+      "rust_seconds": 0.000459183,
+      "nim_seconds": 0.001460373,
+      "nim_over_rust": 3.1803725312130458,
+      "checksum": -477.98046875
+    },
+    {
+      "kernel": "simd",
+      "size": 128,
+      "rust_seconds": 0.00037799,
+      "nim_seconds": 0.000388937,
+      "nim_over_rust": 1.028961083626551,
+      "checksum": -477.98046875
+    },
+    {
+      "kernel": "blocked",
+      "size": 512,
+      "rust_seconds": 0.032545985,
+      "nim_seconds": 0.160911736,
+      "nim_over_rust": 4.94413476808276,
+      "checksum": 1357.35546875
+    },
+    {
+      "kernel": "naive",
+      "size": 512,
+      "rust_seconds": 0.533776378,
+      "nim_seconds": 0.636009757,
+      "nim_over_rust": 1.1915284812397597,
+      "checksum": 1357.35546875
+    },
+    {
+      "kernel": "parallel",
+      "size": 512,
+      "rust_seconds": 0.013051069,
+      "nim_seconds": 0.074413616,
+      "nim_over_rust": 5.701725736029746,
+      "checksum": 1357.35546875
+    },
+    {
+      "kernel": "simd",
+      "size": 512,
+      "rust_seconds": 0.019768038,
+      "nim_seconds": 0.025127404,
+      "nim_over_rust": 1.271112692114412,
+      "checksum": 1357.35546875
+    },
+    {
+      "kernel": "blocked",
+      "size": 1024,
+      "rust_seconds": 0.271704162,
+      "nim_seconds": 1.22231675,
+      "nim_over_rust": 4.498704550576593,
+      "checksum": -0.90234375
+    },
+    {
+      "kernel": "naive",
+      "size": 1024,
+      "rust_seconds": 4.310165503,
+      "nim_seconds": 5.233936155,
+      "nim_over_rust": 1.2143237078383715,
+      "checksum": -0.90234375
+    },
+    {
+      "kernel": "parallel",
+      "size": 1024,
+      "rust_seconds": 0.08427182,
+      "nim_seconds": 0.507784847,
+      "nim_over_rust": 6.025559279483938,
+      "checksum": -0.90234375
+    },
+    {
+      "kernel": "simd",
+      "size": 1024,
+      "rust_seconds": 0.174189103,
+      "nim_seconds": 0.17572638,
+      "nim_over_rust": 1.008825333924591,
+      "checksum": -0.90234375
+    },
+    {
+      "kernel": "dot_scalar",
+      "size": 1048576,
+      "rust_seconds": 0.001183545,
+      "nim_seconds": 0.000876292,
+      "nim_over_rust": 0.7403960136707941,
+      "checksum": -14.9091796875
+    },
+    {
+      "kernel": "dot_simd",
+      "size": 1048576,
+      "rust_seconds": 0.000723832,
+      "nim_seconds": 0.00025172,
+      "nim_over_rust": 0.3477602537605411,
+      "checksum": -14.9091796875
+    }
+  ]
+}

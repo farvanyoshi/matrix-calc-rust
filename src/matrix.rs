@@ -25,6 +25,7 @@ pub struct Matrix<T> {
 }
 impl<T> Matrix<T> {
     /// Collect row-major input. Consumes at most the expected element count + 1.
+    /// Shape requirements: input contains exactly rows*cols row-major elements; dimensions fit usize.
     pub fn try_new<I: IntoIterator<Item = T>>(input: I, rows: usize, cols: usize) -> Result<Self> {
         let len = checked_size(rows, cols)?;
         let mut data = Vec::new();
@@ -43,10 +44,12 @@ impl<T> Matrix<T> {
         Self::try_from_vec(data, rows, cols)
     }
     /// Panicking counterpart to [`Self::try_new`].
+    /// Shape requirements: input contains exactly rows*cols row-major elements; dimensions fit usize.
     pub fn new<I: IntoIterator<Item = T>>(input: I, rows: usize, cols: usize) -> Self {
         Self::try_new(input, rows, cols).expect("invalid matrix input")
     }
     /// Validate and take ownership of an existing vector without copying.
+    /// Shape requirements: data.len() equals rows*cols; dimensions fit usize.
     pub fn try_from_vec(data: Vec<T>, rows: usize, cols: usize) -> Result<Self> {
         if checked_size(rows, cols)? != data.len() {
             return Err(ShapeError::Reshape {
@@ -59,6 +62,7 @@ impl<T> Matrix<T> {
         Ok(Self { rows, cols, data })
     }
     /// Construct from a coordinate callback, visiting coordinates in row order.
+    /// Shape requirements: nonnegative usize dimensions with representable rows*cols storage.
     pub fn try_from_fn(
         rows: usize,
         cols: usize,
@@ -78,10 +82,12 @@ impl<T> Matrix<T> {
         Ok(Self { rows, cols, data })
     }
     /// Coordinate-based construction; panics on invalid dimensions or allocation failure.
+    /// Shape requirements: nonnegative usize dimensions with representable rows*cols storage.
     pub fn from_fn(rows: usize, cols: usize, f: impl FnMut(usize, usize) -> T) -> Self {
         Self::try_from_fn(rows, cols, f).expect("invalid matrix dimensions")
     }
     /// Allocate cloned copies of a value, checking shape overflow and reservation failure.
+    /// Shape requirements: rows*cols is representable; the output has rows×cols elements.
     pub fn try_filled(rows: usize, cols: usize, value: T) -> Result<Self>
     where
         T: Clone,
@@ -93,6 +99,7 @@ impl<T> Matrix<T> {
         Ok(Self { rows, cols, data })
     }
     /// Fill a new matrix with cloned values; panics on invalid dimensions/allocation.
+    /// Shape requirements: rows*cols is representable; the output has rows×cols elements.
     pub fn filled(rows: usize, cols: usize, value: T) -> Self
     where
         T: Clone,
@@ -100,6 +107,7 @@ impl<T> Matrix<T> {
         Self::try_filled(rows, cols, value).expect("invalid matrix dimensions")
     }
     /// Allocate additive zeros, checking dimensions and reservation failure.
+    /// Shape requirements: rows×cols fits addressable element storage.
     pub fn try_zeros(rows: usize, cols: usize) -> Result<Self>
     where
         T: Zero + Clone,
@@ -107,6 +115,7 @@ impl<T> Matrix<T> {
         Self::try_filled(rows, cols, T::zero())
     }
     /// Construct additive zeros; panics on invalid dimensions/allocation.
+    /// Shape requirements: rows×cols fits addressable element storage.
     pub fn zeros(rows: usize, cols: usize) -> Self
     where
         T: Zero + Clone,
@@ -114,6 +123,7 @@ impl<T> Matrix<T> {
         Self::try_zeros(rows, cols).expect("invalid matrix dimensions")
     }
     /// Allocate multiplicative ones, checking dimensions and reservation failure.
+    /// Shape requirements: rows×cols fits addressable element storage.
     pub fn try_ones(rows: usize, cols: usize) -> Result<Self>
     where
         T: One + Clone,
@@ -121,6 +131,7 @@ impl<T> Matrix<T> {
         Self::try_filled(rows, cols, T::one())
     }
     /// Construct multiplicative ones; panics on invalid dimensions/allocation.
+    /// Shape requirements: rows×cols fits addressable element storage.
     pub fn ones(rows: usize, cols: usize) -> Self
     where
         T: One + Clone,
@@ -128,6 +139,7 @@ impl<T> Matrix<T> {
         Self::try_ones(rows, cols).expect("invalid matrix dimensions")
     }
     /// Allocate a square identity, checking dimensions and reservation failure.
+    /// Shape requirements: side×side fits addressable element storage.
     pub fn try_identity(side: usize) -> Result<Self>
     where
         T: Zero + One + Clone,
@@ -139,6 +151,7 @@ impl<T> Matrix<T> {
         Ok(m)
     }
     /// Construct a square identity; panics on invalid dimensions/allocation.
+    /// Shape requirements: side×side fits addressable element storage.
     pub fn identity(side: usize) -> Self
     where
         T: Zero + One + Clone,
@@ -146,6 +159,7 @@ impl<T> Matrix<T> {
         Self::try_identity(side).expect("invalid matrix dimensions")
     }
     /// Empty outer input denotes 0×0; ragged rows are rejected.
+    /// Shape requirements: all input rows have the same length; empty outer input denotes 0×0.
     pub fn try_from_rows(rows: Vec<Vec<T>>) -> Result<Self> {
         let nr = rows.len();
         let nc = rows.first().map_or(0, Vec::len);
@@ -155,46 +169,57 @@ impl<T> Matrix<T> {
         Self::try_new(rows.into_iter().flatten(), nr, nc)
     }
     /// Number of logical rows, including empty rows.
+    /// Shape requirements: any valid stored layout; additional operand restrictions are documented above.
     pub fn rows(&self) -> usize {
         self.rows
     }
     /// Number of logical columns, including empty columns.
+    /// Shape requirements: any valid stored layout; additional operand restrictions are documented above.
     pub fn cols(&self) -> usize {
         self.cols
     }
     /// Logical dimensions as `(rows, cols)`.
+    /// Shape requirements: any valid stored layout; additional operand restrictions are documented above.
     pub fn shape(&self) -> (usize, usize) {
         (self.rows, self.cols)
     }
     /// Whether the two logical dimensions are equal.
+    /// Shape requirements: any valid stored layout; additional operand restrictions are documented above.
     pub fn is_square(&self) -> bool {
         self.rows == self.cols
     }
     /// Borrow the contiguous row-major elements.
+    /// Shape requirements: any valid stored layout; additional operand restrictions are documented above.
     pub fn data(&self) -> &[T] {
         &self.data
     }
     /// Mutably borrow elements without allowing the storage length to change.
+    /// Shape requirements: any valid stored layout; additional operand restrictions are documented above.
     pub fn data_mut(&mut self) -> &mut [T] {
         &mut self.data
     }
     /// Alias for the immutable row-major data slice.
+    /// Shape requirements: any valid stored layout; additional operand restrictions are documented above.
     pub fn as_slice(&self) -> &[T] {
         self.data()
     }
     /// Alias for the mutable row-major data slice.
+    /// Shape requirements: any valid stored layout; additional operand restrictions are documented above.
     pub fn as_mut_slice(&mut self) -> &mut [T] {
         self.data_mut()
     }
     /// Consume the matrix and return its row-major buffer.
+    /// Shape requirements: any valid stored layout; additional operand restrictions are documented above.
     pub fn into_vec(self) -> Vec<T> {
         self.data
     }
     /// Number of stored elements.
+    /// Shape requirements: any valid stored layout; additional operand restrictions are documented above.
     pub fn len(&self) -> usize {
         self.data.len()
     }
     /// Whether there are zero stored elements, regardless of logical shape.
+    /// Shape requirements: any valid stored layout; additional operand restrictions are documented above.
     pub fn is_empty(&self) -> bool {
         self.data.is_empty()
     }
@@ -221,29 +246,35 @@ impl<T> Matrix<T> {
         }
     }
     /// Borrow an element; invalid logical coordinates return `None`.
+    /// Shape requirements: 0≤row<rows and 0≤col<cols for a successful access.
     pub fn get(&self, row: usize, col: usize) -> Option<&T> {
         self.coordinate(row, col).ok().map(|i| &self.data[i])
     }
     /// Mutably borrow an element; invalid logical coordinates return `None`.
+    /// Shape requirements: 0≤row<rows and 0≤col<cols for a successful access.
     pub fn get_mut(&mut self, row: usize, col: usize) -> Option<&mut T> {
         let i = self.coordinate(row, col).ok()?;
         Some(&mut self.data[i])
     }
     /// Borrow an element or return a detailed row/column error.
+    /// Shape requirements: 0≤row<rows and 0≤col<cols.
     pub fn try_get(&self, row: usize, col: usize) -> Result<&T> {
         Ok(&self.data[self.coordinate(row, col)?])
     }
     /// Mutably borrow an element or return a detailed row/column error.
+    /// Shape requirements: 0≤row<rows and 0≤col<cols.
     pub fn try_get_mut(&mut self, row: usize, col: usize) -> Result<&mut T> {
         let i = self.coordinate(row, col)?;
         Ok(&mut self.data[i])
     }
     /// Replace one element after validating both logical coordinates.
+    /// Shape requirements: 0≤row<rows and 0≤col<cols.
     pub fn set(&mut self, row: usize, col: usize, value: T) -> Result<()> {
         *self.try_get_mut(row, col)? = value;
         Ok(())
     }
     /// Borrow one contiguous row, including a valid empty row; invalid rows return `None`.
+    /// Shape requirements: row must be in 0..rows; a zero-width row is valid.
     pub fn row(&self, row: usize) -> Option<&[T]> {
         if row >= self.rows {
             None
@@ -252,6 +283,7 @@ impl<T> Matrix<T> {
         }
     }
     /// Mutably borrow one row; invalid rows return `None`.
+    /// Shape requirements: row must be in 0..rows; a zero-width row is valid.
     pub fn row_mut(&mut self, row: usize) -> Option<&mut [T]> {
         if row >= self.rows {
             None
@@ -260,20 +292,24 @@ impl<T> Matrix<T> {
         }
     }
     /// Iterate elements in logical row-major order.
+    /// Shape requirements: any valid stored layout; additional operand restrictions are documented above.
     pub fn iter(&self) -> std::slice::Iter<'_, T> {
         self.data.iter()
     }
     /// Mutably iterate elements in row-major order.
+    /// Shape requirements: any valid stored layout; additional operand restrictions are documented above.
     pub fn iter_mut(&mut self) -> std::slice::IterMut<'_, T> {
         self.data.iter_mut()
     }
     /// Iterate all logical rows, including empty rows; supports reverse traversal.
+    /// Shape requirements: any valid stored layout; additional operand restrictions are documented above.
     pub fn iter_rows(
         &self,
     ) -> impl ExactSizeIterator<Item = &[T]> + DoubleEndedIterator + FusedIterator {
         (0..self.rows).map(|r| &self.data[r * self.cols..(r + 1) * self.cols])
     }
     /// Iterate disjoint mutable rows, including empty rows.
+    /// Shape requirements: any valid stored layout; additional operand restrictions are documented above.
     pub fn iter_rows_mut(&mut self) -> RowsMut<'_, T> {
         RowsMut {
             rest: &mut self.data,
@@ -282,6 +318,7 @@ impl<T> Matrix<T> {
         }
     }
     /// Panics if the requested column is outside the logical shape.
+    /// Shape requirements: col must be in 0..cols; zero-height columns are valid.
     pub fn iter_col(
         &self,
         col: usize,
@@ -290,6 +327,7 @@ impl<T> Matrix<T> {
         self.data.iter().skip(col).step_by(self.cols).fuse()
     }
     /// Iterate mutable column elements; panics for an invalid column.
+    /// Shape requirements: col must be in 0..cols; zero-height columns are valid.
     pub fn iter_col_mut(
         &mut self,
         col: usize,
@@ -298,6 +336,7 @@ impl<T> Matrix<T> {
         self.data.iter_mut().skip(col).step_by(self.cols).fuse()
     }
     /// Allocate a shape-preserving transform in row-major order; the callback may mutate captured state.
+    /// Shape requirements: any valid stored layout; additional operand restrictions are documented above.
     pub fn map<U>(&self, mut f: impl FnMut(&T) -> U) -> Matrix<U> {
         Matrix {
             rows: self.rows,
@@ -306,6 +345,7 @@ impl<T> Matrix<T> {
         }
     }
     /// Fallible callback mapping. Stops at the first callback error.
+    /// Shape requirements: any valid stored layout; additional operand restrictions are documented above.
     pub fn try_map<U, E>(
         &self,
         f: impl FnMut(&T) -> std::result::Result<U, E>,
@@ -347,6 +387,7 @@ impl<T> Matrix<T> {
         Ok(self.rows)
     }
     /// Validate identical shapes before allocating pairwise callback results.
+    /// Shape requirements: A and B both have shape M×N; callback output preserves that shape.
     pub fn try_zip_map<U, R>(
         &self,
         other: &Matrix<U>,
@@ -360,11 +401,13 @@ impl<T> Matrix<T> {
         )
     }
     /// Pairwise mapping; panics on incompatible dimensions.
+    /// Shape requirements: A and B both have shape M×N; callback output preserves that shape.
     pub fn zip_map<U, R>(&self, other: &Matrix<U>, f: impl FnMut(&T, &U) -> R) -> Matrix<R> {
         self.try_zip_map(other, f)
             .expect("incompatible matrix shapes")
     }
     /// Explicit numeric conversion with range checking; floats may truncate to integers.
+    /// Shape requirements: any valid stored layout; additional operand restrictions are documented above.
     pub fn try_cast<U: NumCast>(&self) -> Result<Matrix<U>>
     where
         T: ToPrimitive + Copy,
@@ -372,6 +415,7 @@ impl<T> Matrix<T> {
         self.try_map(|x| U::from(*x).ok_or(NumericError::Conversion.into()))
     }
     /// Numeric conversion that must round-trip exactly through the source type.
+    /// Shape requirements: any valid stored layout; additional operand restrictions are documented above.
     pub fn try_cast_exact<U: NumCast + ToPrimitive + Copy>(&self) -> Result<Matrix<U>>
     where
         T: NumCast + Copy + PartialEq,

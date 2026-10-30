@@ -37,6 +37,7 @@ pub struct Tolerance<T> {
 }
 impl<T: Real> Tolerance<T> {
     /// Construct validated finite nonnegative absolute and relative tolerances.
+    /// Shape requirements: scalar values only; tolerance components must be finite and nonnegative.
     pub fn new(atol: T, rtol: T) -> Result<Self> {
         if !atol.is_finite() || !rtol.is_finite() || atol < T::zero() || rtol < T::zero() {
             return Err(NumericError::InvalidOptions.into());
@@ -44,14 +45,17 @@ impl<T: Real> Tolerance<T> {
         Ok(Self { atol, rtol })
     }
     /// Absolute tolerance in the original scalar units.
+    /// Shape requirements: scalar values only; tolerance components must be finite and nonnegative.
     pub fn absolute(&self) -> T {
         self.atol
     }
     /// Dimensionless relative tolerance.
+    /// Shape requirements: scalar values only; tolerance components must be finite and nonnegative.
     pub fn relative(&self) -> T {
         self.rtol
     }
     /// Default tolerance: zero absolute and `8*max(dimension,1)*epsilon` relative.
+    /// Shape requirements: scalar values only; tolerance components must be finite and nonnegative.
     pub fn for_dimension(dimension: usize) -> Self {
         Self {
             atol: T::zero(),
@@ -59,10 +63,12 @@ impl<T: Real> Tolerance<T> {
         }
     }
     /// Compute `atol + rtol*abs(scale)`; this raw expression may overflow for extreme tolerances.
+    /// Shape requirements: scalar values only; tolerance components must be finite and nonnegative.
     pub fn threshold(&self, scale: T) -> T {
         self.atol + self.rtol * scale.abs()
     }
     /// Overflow-safe mixed absolute/relative comparison of finite scalar values.
+    /// Shape requirements: scalar values only; tolerance components must be finite and nonnegative.
     pub fn close(&self, a: T, b: T) -> bool {
         if !a.is_finite() || !b.is_finite() {
             return false;
@@ -157,6 +163,7 @@ pub(crate) fn scaled_ratio<T: Real>(x: T, numerator: T, denominator: T, other: T
 }
 impl<T: Real> Matrix<T> {
     /// Whether every element is finite; an empty matrix is finite.
+    /// Shape requirements: any valid stored layout; additional operand restrictions are documented above.
     pub fn all_finite(&self) -> bool {
         self.iter().all(|x| x.is_finite())
     }
@@ -168,15 +175,18 @@ impl<T: Real> Matrix<T> {
         }
     }
     /// Largest absolute element, or zero for empty input; use `all_finite` to reject NaN first.
+    /// Shape requirements: any valid stored layout; additional operand restrictions are documented above.
     pub fn max_abs(&self) -> T {
         self.iter().fold(T::zero(), |m, x| m.max(x.abs()))
     }
     /// Compare identical shapes elementwise using overflow-safe finite scalar comparisons.
+    /// Shape requirements: operands have identical shape; mismatch returns false.
     pub fn approx_eq(&self, other: &Self, tolerance: Tolerance<T>) -> bool {
         self.shape() == other.shape()
             && self.iter().zip(other).all(|(a, b)| tolerance.close(*a, *b))
     }
     /// Scaled compensated sum. Nonfinite inputs retain IEEE sum semantics.
+    /// Shape requirements: any valid stored layout; additional operand restrictions are documented above.
     pub fn sum_compensated(&self) -> T {
         if !self.all_finite() {
             return self.iter().copied().fold(T::zero(), |a, b| a + b);
@@ -188,6 +198,7 @@ impl<T: Real> Matrix<T> {
         compensated(self.iter().map(|x| *x / scale)) * scale
     }
     /// Scaled compensated mean; empty or nonfinite input is an error.
+    /// Shape requirements: any valid stored layout; additional operand restrictions are documented above.
     pub fn mean(&self) -> Result<T> {
         self.finite()?;
         if self.is_empty() {
@@ -201,6 +212,7 @@ impl<T: Real> Matrix<T> {
         Ok(compensated(self.iter().map(|x| (*x / scale) / n)) * scale)
     }
     /// Row means as `rows×1`; existing empty groups or nonfinite data are errors.
+    /// Shape requirements: any valid stored layout; additional operand restrictions are documented above.
     pub fn row_means(&self) -> Result<Self> {
         if self.cols() == 0 && self.rows() > 0 {
             return Err(NumericError::Empty.into());
@@ -213,6 +225,7 @@ impl<T: Real> Matrix<T> {
         })
     }
     /// Column means as `1×cols`; existing empty groups or nonfinite data are errors.
+    /// Shape requirements: any valid stored layout; additional operand restrictions are documented above.
     pub fn col_means(&self) -> Result<Self> {
         if self.rows() == 0 && self.cols() > 0 {
             return Err(NumericError::Empty.into());
@@ -225,28 +238,33 @@ impl<T: Real> Matrix<T> {
         })
     }
     /// Scaled Euclidean norm over all elements, independent of matrix shape.
+    /// Shape requirements: any valid stored layout; additional operand restrictions are documented above.
     pub fn norm_frobenius(&self) -> T {
         self.iter().fold(T::zero(), |s, x| s.hypot(*x))
     }
     /// Stable Euclidean norm of a finite row/column vector.
+    /// Shape requirements: input is a finite 1×N or N×1 vector.
     pub fn vector_norm_2(&self) -> Result<T> {
         self.vector_len()?;
         self.finite()?;
         Ok(self.norm_frobenius())
     }
     /// Sum of absolute values of a finite row/column vector.
+    /// Shape requirements: input is a finite 1×N or N×1 vector.
     pub fn vector_norm_1(&self) -> Result<T> {
         self.vector_len()?;
         self.finite()?;
         Ok(self.map(|x| x.abs()).sum_compensated())
     }
     /// Largest absolute value of a finite row/column vector.
+    /// Shape requirements: input is a finite 1×N or N×1 vector.
     pub fn vector_norm_inf(&self) -> Result<T> {
         self.vector_len()?;
         self.finite()?;
         Ok(self.max_abs())
     }
     /// Induced matrix 1-norm: maximum absolute column sum; nonfinite input is an error.
+    /// Shape requirements: any valid stored layout; additional operand restrictions are documented above.
     pub fn norm_1(&self) -> Result<T> {
         self.finite()?;
         if self.is_empty() {
@@ -260,6 +278,7 @@ impl<T: Real> Matrix<T> {
         Ok(max)
     }
     /// Induced matrix infinity-norm: maximum absolute row sum; nonfinite input is an error.
+    /// Shape requirements: any valid stored layout; additional operand restrictions are documented above.
     pub fn norm_inf(&self) -> Result<T> {
         self.finite()?;
         if self.is_empty() {
@@ -273,6 +292,7 @@ impl<T: Real> Matrix<T> {
         Ok(max)
     }
     /// Normalize a finite row/column vector after scaling; a zero vector is an error.
+    /// Shape requirements: input is a finite 1×N or N×1 vector.
     pub fn normalized(&self) -> Result<Self> {
         self.vector_len()?;
         self.finite()?;
@@ -285,6 +305,7 @@ impl<T: Real> Matrix<T> {
         Ok(scaled.scalar_div(norm))
     }
     /// Scaled compensated dot product of equally sized finite row/column vectors.
+    /// Shape requirements: both finite row/column vectors have equal length N.
     pub fn dot_compensated(&self, other: &Self) -> Result<T> {
         if self.vector_len()? != other.vector_len()? {
             return Err(self.dimension_error(other, "dot"));
@@ -303,26 +324,32 @@ impl<T: Real> Matrix<T> {
         ))
     }
     /// Allocate absolute element values.
+    /// Shape requirements: any valid stored layout; additional operand restrictions are documented above.
     pub fn abs_elements(&self) -> Self {
         self.map(|x| x.abs())
     }
     /// Allocate elementwise square roots; invalid real arguments follow IEEE NaN semantics.
+    /// Shape requirements: any valid stored layout; additional operand restrictions are documented above.
     pub fn sqrt_elements(&self) -> Self {
         self.map(|x| x.sqrt())
     }
     /// Allocate elementwise exponentials, retaining IEEE overflow behavior.
+    /// Shape requirements: any valid stored layout; additional operand restrictions are documented above.
     pub fn exp_elements(&self) -> Self {
         self.map(|x| x.exp())
     }
     /// Allocate elementwise natural logarithms, retaining IEEE exceptional values.
+    /// Shape requirements: any valid stored layout; additional operand restrictions are documented above.
     pub fn ln_elements(&self) -> Self {
         self.map(|x| x.ln())
     }
     /// Allocate elementwise real powers using the scalar's IEEE semantics.
+    /// Shape requirements: any valid stored layout; additional operand restrictions are documented above.
     pub fn powf_elements(&self, p: T) -> Self {
         self.map(|x| x.powf(p))
     }
     /// Whether finite square input matches its transpose at the requested entrywise tolerance.
+    /// Shape requirements: input is finite N×N; nonsquare input returns false.
     pub fn is_symmetric(&self, tol: Tolerance<T>) -> bool {
         self.is_square()
             && self.all_finite()
@@ -340,18 +367,22 @@ impl<T: PrimInt + CheckedNeg> Matrix<T> {
         Self::try_from_vec(data, self.rows(), self.cols())
     }
     /// Add same-shaped integer matrices, returning shape or overflow errors.
+    /// Shape requirements: equal-shaped integer operands for pairwise arithmetic; inner dimensions agree for matmul; scalars preserve shape.
     pub fn checked_add(&self, rhs: &Self) -> Result<Self> {
         self.checked_zip(rhs, num_traits::CheckedAdd::checked_add)
     }
     /// Subtract same-shaped integer matrices, returning shape or overflow errors.
+    /// Shape requirements: equal-shaped integer operands for pairwise arithmetic; inner dimensions agree for matmul; scalars preserve shape.
     pub fn checked_sub(&self, rhs: &Self) -> Result<Self> {
         self.checked_zip(rhs, num_traits::CheckedSub::checked_sub)
     }
     /// Elementwise integer multiplication with shape and overflow checks.
+    /// Shape requirements: equal-shaped integer operands for pairwise arithmetic; inner dimensions agree for matmul; scalars preserve shape.
     pub fn checked_hadamard(&self, rhs: &Self) -> Result<Self> {
         self.checked_zip(rhs, num_traits::CheckedMul::checked_mul)
     }
     /// Integer elementwise division with shape, zero, and overflow checks.
+    /// Shape requirements: equal-shaped integer operands for pairwise arithmetic; inner dimensions agree for matmul; scalars preserve shape.
     pub fn checked_element_div(&self, rhs: &Self) -> Result<Self> {
         self.same_shape(rhs, "checked division")?;
         if rhs.iter().any(|x| x.is_zero()) {
@@ -360,22 +391,27 @@ impl<T: PrimInt + CheckedNeg> Matrix<T> {
         self.checked_zip(rhs, num_traits::CheckedDiv::checked_div)
     }
     /// Integer negation with overflow checks, including unsigned nonzero values.
+    /// Shape requirements: equal-shaped integer operands for pairwise arithmetic; inner dimensions agree for matmul; scalars preserve shape.
     pub fn checked_negate(&self) -> Result<Self> {
         self.try_map(|x| x.checked_neg().ok_or(NumericError::Overflow.into()))
     }
     /// Integer scalar addition with overflow checking.
+    /// Shape requirements: equal-shaped integer operands for pairwise arithmetic; inner dimensions agree for matmul; scalars preserve shape.
     pub fn checked_scalar_add(&self, x: T) -> Result<Self> {
         self.try_map(|a| a.checked_add(&x).ok_or(NumericError::Overflow.into()))
     }
     /// Integer scalar subtraction with overflow checking.
+    /// Shape requirements: equal-shaped integer operands for pairwise arithmetic; inner dimensions agree for matmul; scalars preserve shape.
     pub fn checked_scalar_sub(&self, x: T) -> Result<Self> {
         self.try_map(|a| a.checked_sub(&x).ok_or(NumericError::Overflow.into()))
     }
     /// Integer scalar multiplication with overflow checking.
+    /// Shape requirements: equal-shaped integer operands for pairwise arithmetic; inner dimensions agree for matmul; scalars preserve shape.
     pub fn checked_scalar_mul(&self, x: T) -> Result<Self> {
         self.try_map(|a| a.checked_mul(&x).ok_or(NumericError::Overflow.into()))
     }
     /// Integer scalar division with zero and signed-overflow checks.
+    /// Shape requirements: equal-shaped integer operands for pairwise arithmetic; inner dimensions agree for matmul; scalars preserve shape.
     pub fn checked_scalar_div(&self, x: T) -> Result<Self> {
         if x.is_zero() {
             return Err(NumericError::DivideByZero.into());
@@ -383,6 +419,7 @@ impl<T: PrimInt + CheckedNeg> Matrix<T> {
         self.try_map(|a| a.checked_div(&x).ok_or(NumericError::Overflow.into()))
     }
     /// Integer matrix multiplication with checked products and sums.
+    /// Shape requirements: equal-shaped integer operands for pairwise arithmetic; inner dimensions agree for matmul; scalars preserve shape.
     pub fn checked_matmul(&self, rhs: &Self) -> Result<Self> {
         if self.cols() != rhs.rows() {
             return Err(self.dimension_error(rhs, "checked multiply"));
@@ -403,24 +440,28 @@ impl<T: PrimInt + CheckedNeg> Matrix<T> {
         Ok(out)
     }
     /// Compute checked addition before replacing the destination, preserving it on error.
+    /// Shape requirements: equal-shaped integer operands for pairwise arithmetic; inner dimensions agree for matmul; scalars preserve shape.
     pub fn checked_add_assign(&mut self, rhs: &Self) -> Result<()> {
         let out = self.checked_add(rhs)?;
         *self = out;
         Ok(())
     }
     /// Compute checked subtraction before replacing the destination, preserving it on error.
+    /// Shape requirements: equal-shaped integer operands for pairwise arithmetic; inner dimensions agree for matmul; scalars preserve shape.
     pub fn checked_sub_assign(&mut self, rhs: &Self) -> Result<()> {
         let out = self.checked_sub(rhs)?;
         *self = out;
         Ok(())
     }
     /// Compute checked scaling before replacing the destination, preserving it on error.
+    /// Shape requirements: equal-shaped integer operands for pairwise arithmetic; inner dimensions agree for matmul; scalars preserve shape.
     pub fn checked_scalar_mul_assign(&mut self, x: T) -> Result<()> {
         let out = self.checked_scalar_mul(x)?;
         *self = out;
         Ok(())
     }
     /// Compute checked division before replacing the destination, preserving it on error.
+    /// Shape requirements: equal-shaped integer operands for pairwise arithmetic; inner dimensions agree for matmul; scalars preserve shape.
     pub fn checked_scalar_div_assign(&mut self, x: T) -> Result<()> {
         let out = self.checked_scalar_div(x)?;
         *self = out;

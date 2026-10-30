@@ -9,6 +9,7 @@ use std::ops::{
 
 impl<T: Clone> Matrix<T> {
     /// Allocate elementwise negation using the scalar's ordinary arithmetic.
+    /// Shape requirements: any valid stored layout; additional operand restrictions are documented above.
     pub fn negate(&self) -> Matrix<<T as Neg>::Output>
     where
         T: Neg,
@@ -16,6 +17,7 @@ impl<T: Clone> Matrix<T> {
         self.map(|x| -x.clone())
     }
     /// Add identically shaped matrices; return a dimension error on mismatch.
+    /// Shape requirements: A and B both have shape M×N.
     pub fn try_add<U: Clone>(&self, rhs: &Matrix<U>) -> Result<Matrix<<T as Add<U>>::Output>>
     where
         T: Add<U>,
@@ -23,6 +25,7 @@ impl<T: Clone> Matrix<T> {
         self.try_zip_map(rhs, |a, b| a.clone() + b.clone())
     }
     /// Subtract identically shaped matrices; return a dimension error on mismatch.
+    /// Shape requirements: A and B both have shape M×N.
     pub fn try_sub<U: Clone>(&self, rhs: &Matrix<U>) -> Result<Matrix<<T as Sub<U>>::Output>>
     where
         T: Sub<U>,
@@ -30,6 +33,7 @@ impl<T: Clone> Matrix<T> {
         self.try_zip_map(rhs, |a, b| a.clone() - b.clone())
     }
     /// Multiply identically shaped matrices element by element.
+    /// Shape requirements: A and B both have shape M×N.
     pub fn try_hadamard<U: Clone>(&self, rhs: &Matrix<U>) -> Result<Matrix<<T as Mul<U>>::Output>>
     where
         T: Mul<U>,
@@ -37,6 +41,7 @@ impl<T: Clone> Matrix<T> {
         self.try_zip_map(rhs, |a, b| a.clone() * b.clone())
     }
     /// Elementwise multiplication; panics if shapes differ.
+    /// Shape requirements: A and B both have shape M×N.
     pub fn hadamard<U: Clone>(&self, rhs: &Matrix<U>) -> Matrix<<T as Mul<U>>::Output>
     where
         T: Mul<U>,
@@ -44,6 +49,7 @@ impl<T: Clone> Matrix<T> {
         self.try_hadamard(rhs).expect("incompatible matrix shapes")
     }
     /// Validate identical shapes, then reject zero divisors before elementwise division.
+    /// Shape requirements: A and B both have shape M×N; divisors are nonzero.
     pub fn try_element_div<U: Clone + Zero>(
         &self,
         rhs: &Matrix<U>,
@@ -58,6 +64,7 @@ impl<T: Clone> Matrix<T> {
         self.try_zip_map(rhs, |a, b| a.clone() / b.clone())
     }
     /// Elementwise division; panics for shape mismatch or a zero divisor.
+    /// Shape requirements: A and B both have shape M×N; divisors are nonzero.
     pub fn element_div<U: Clone + Zero>(&self, rhs: &Matrix<U>) -> Matrix<<T as Div<U>>::Output>
     where
         T: Div<U>,
@@ -65,6 +72,7 @@ impl<T: Clone> Matrix<T> {
         self.try_element_div(rhs).expect("invalid element division")
     }
     /// Compatibility alias for [`Self::try_element_div`].
+    /// Shape requirements: A and B both have shape M×N; divisors are nonzero.
     pub fn try_el_div<U: Clone + Zero>(
         &self,
         rhs: &Matrix<U>,
@@ -75,6 +83,7 @@ impl<T: Clone> Matrix<T> {
         self.try_element_div(rhs)
     }
     /// Compatibility alias for `element_div`, including its panic behavior.
+    /// Shape requirements: A and B both have shape M×N; divisors are nonzero.
     pub fn el_div<U: Clone + Zero>(&self, rhs: &Matrix<U>) -> Matrix<<T as Div<U>>::Output>
     where
         T: Div<U>,
@@ -82,6 +91,7 @@ impl<T: Clone> Matrix<T> {
         self.element_div(rhs)
     }
     /// Allocate elementwise addition of a scalar.
+    /// Shape requirements: any valid stored layout; additional operand restrictions are documented above.
     pub fn scalar_add<S: Clone>(&self, x: S) -> Matrix<<T as Add<S>>::Output>
     where
         T: Add<S>,
@@ -89,6 +99,7 @@ impl<T: Clone> Matrix<T> {
         self.map(|a| a.clone() + x.clone())
     }
     /// Allocate elementwise subtraction of a scalar.
+    /// Shape requirements: any valid stored layout; additional operand restrictions are documented above.
     pub fn scalar_sub<S: Clone>(&self, x: S) -> Matrix<<T as Sub<S>>::Output>
     where
         T: Sub<S>,
@@ -96,6 +107,7 @@ impl<T: Clone> Matrix<T> {
         self.map(|a| a.clone() - x.clone())
     }
     /// Allocate elementwise multiplication by a scalar; ordinary scalar overflow rules apply.
+    /// Shape requirements: any valid stored layout; additional operand restrictions are documented above.
     pub fn scalar_mul<S: Clone>(&self, x: S) -> Matrix<<T as Mul<S>>::Output>
     where
         T: Mul<S>,
@@ -103,6 +115,7 @@ impl<T: Clone> Matrix<T> {
         self.map(|a| a.clone() * x.clone())
     }
     /// Compatibility wrapper. Numeric overflow is checked by `checked_scalar_mul`.
+    /// Shape requirements: any valid stored layout; additional operand restrictions are documented above.
     pub fn try_scalar_mul<S: Clone>(&self, x: S) -> Result<Matrix<<T as Mul<S>>::Output>>
     where
         T: Mul<S>,
@@ -110,6 +123,7 @@ impl<T: Clone> Matrix<T> {
         Ok(self.scalar_mul(x))
     }
     /// Reject a zero scalar, then divide each element using scalar arithmetic.
+    /// Shape requirements: any M×N input and a nonzero scalar divisor.
     pub fn try_scalar_div<S: Clone + Zero>(&self, x: S) -> Result<Matrix<<T as Div<S>>::Output>>
     where
         T: Div<S>,
@@ -120,6 +134,7 @@ impl<T: Clone> Matrix<T> {
         Ok(self.map(|a| a.clone() / x.clone()))
     }
     /// Divide every element by a scalar; panics for a zero divisor.
+    /// Shape requirements: any M×N input and a nonzero scalar divisor.
     pub fn scalar_div<S: Clone + Zero>(&self, x: S) -> Matrix<<T as Div<S>>::Output>
     where
         T: Div<S>,
@@ -127,6 +142,7 @@ impl<T: Clone> Matrix<T> {
         self.try_scalar_div(x).expect("invalid scalar division")
     }
     /// Multiply compatible matrices, checking output dimensions and reservation failure.
+    /// Shape requirements: A=M×K and B=K×N; result storage M×N must be representable.
     pub fn try_matmul<U: Clone>(&self, rhs: &Matrix<U>) -> Result<Matrix<<T as Mul<U>>::Output>>
     where
         T: Mul<U>,
@@ -141,6 +157,7 @@ impl<T: Clone> Matrix<T> {
     }
 
     /// Matrix multiplication; panics on incompatible dimensions or allocation failure.
+    /// Shape requirements: A=M×K and B=K×N; result storage M×N must be representable.
     pub fn matmul<U: Clone>(&self, rhs: &Matrix<U>) -> Matrix<<T as Mul<U>>::Output>
     where
         T: Mul<U>,
@@ -149,6 +166,7 @@ impl<T: Clone> Matrix<T> {
         self.try_matmul(rhs).expect("invalid matrix multiplication")
     }
     /// Compute into a pre-sized output, validating all shapes before writing.
+    /// Shape requirements: A=M×K, B=K×N, and the preallocated output is M×N.
     pub fn matmul_into(&self, rhs: &Self, out: &mut Self) -> Result<()>
     where
         T: Mul<Output = T> + Zero + AddAssign,

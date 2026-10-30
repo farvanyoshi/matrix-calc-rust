@@ -14,6 +14,7 @@ pub struct SymmetricEigen<T> {
 }
 impl<T: Real> SymmetricEigen<T> {
     /// Compute this factorization with explicit numerical options; reject invalid input and exhausted iteration.
+    /// Shape requirements: finite symmetric N×N input.
     pub fn decompose(input: &Matrix<T>, options: DecompositionOptions<T>) -> Result<Self> {
         let n = input.square()?;
         let tol = options.resolve(n)?;
@@ -110,14 +111,17 @@ impl<T: Real> SymmetricEigen<T> {
         })
     }
     /// Ascending real eigenvalues.
+    /// Shape requirements: any valid stored layout; additional operand restrictions are documented above.
     pub fn eigenvalues(&self) -> &[T] {
         &self.values
     }
     /// Orthonormal eigenvectors stored as columns, matching the eigenvalue order.
+    /// Shape requirements: any valid stored layout; additional operand restrictions are documented above.
     pub fn eigenvectors(&self) -> &Matrix<T> {
         &self.vectors
     }
     /// Number of complete pair sweeps used to certify convergence.
+    /// Shape requirements: any valid stored layout; additional operand restrictions are documented above.
     pub fn sweeps(&self) -> usize {
         self.sweeps
     }

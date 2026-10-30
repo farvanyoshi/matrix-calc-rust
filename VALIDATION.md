@@ -1,70 +1,50 @@
-# Implementation verification
+# Roadmap verification, version 0.3.0
 
-Completed on `dev` with Rust 1.85.1 on Linux x86-64. CI additionally defines
-checks for current stable Rust; hosted CI has not been executed in this local
-session. All implementation commits use author and committer
-`farvanyoshi <nvnjoshi@outlook.com>`. Only the Rust checkout was changed.
+Tested on Linux x86-64 with Rust 1.85.1 and Nim 2.2.12 (C backend). This records
+executed checks; hosted CI and ARM runtime execution are not claimed.
 
-## Executed checks
-
-| Check | Observed result |
+| Check | Result |
 | --- | --- |
-| `cargo fmt --check` | Passed |
-| `cargo test --locked --no-default-features` | 40 tests and 5 documentation examples passed |
-| `cargo test --locked --all-features` | 41 tests and 5 documentation examples passed |
-| `cargo test --locked --release --all-features` | 41 tests and 5 documentation examples passed |
-| `cargo clippy --locked --all-targets --all-features -- -D warnings` | Passed with no warnings |
-| `RUSTDOCFLAGS='-D warnings' cargo doc --locked --no-deps --all-features` | Passed, including the enabled missing-public-documentation lint |
-| `cargo run --locked --example solve` | Passed solution/residual assertions; ran square and minimum-norm solves |
-| `cargo run --locked --example views` | Passed mutation assertions and ran transpose-view extraction |
-| `cargo bench --locked --bench kernels` | Completed; steady-state measurements include dense sizes through 256×256 |
-| `cargo +nightly miri test --locked --test structural --test core_api --test regressions` | All 6 targeted tests passed |
-| `cargo package --list --locked --all-features` | Reviewed package contents; ignored local tooling is excluded |
-| `cargo package --locked --all-features` | Packaged and rebuilt the extracted archive successfully |
+| Rust debug, all features | 57 tests + 6 documentation examples passed |
+| Rust release, all features | 57 tests + 6 documentation examples passed |
+| Rust formatting / Clippy | Passed, warnings denied |
+| Rust documentation | Passed, warnings denied; explicit public shape contracts |
+| Nim debug / ORC | 33 named tests passed |
+| Nim release / ORC | 33 named tests passed |
+| Nim release / ARC | 33 named tests passed |
+| Nim release with compiler bounds/overflow checks disabled | 33 named tests passed; explicit guards remain effective |
+| Cross-language / independent NumPy | 114 cases passed, NumPy 2.3.5 |
+| Rust Miri | 10 Tensor/Vector tests + 1 explicit scalar-dispatch test passed |
+| Rust AddressSanitizer | Accelerated, Tensor and Vector suites passed |
+| Nim AddressSanitizer + UndefinedBehaviorSanitizer | Accelerated task/FFI kernel checks passed |
+| Scalar fallback | Rust Miri dispatch and Nim forced scalar/threads-off execution passed |
+| Architecture checks | AVX executed on host; Rust NEON/AArch64 compile-check passed |
+| REPL integration | Piped matrix, variable, syntax-error recovery and subsequent sum executed in both languages |
+| Benchmarks | Criterion and benchy repeated all 128²/512²/1024² kernels; elementwise errors zero on binary-fraction fixtures |
+| Profiling | Real GDB stack samples and Callgrind instruction/cache simulation retained |
 
-No executed suite has failed, ignored, disabled, or expected-failure tests in the
-final results. The one-test difference in minimal builds is the intentionally
-feature-gated serde suite, which is compiled and executed in all-feature builds.
-The empty default feature set is equivalent to the tested minimal configuration.
+Rust's pre-existing generated test categories contain 416 cases inside their test
+functions. New Tensor tests additionally generate layouts/broadcasts. Nim includes
+128 seeded float32/64 factorization cases and 49 tensor shape combinations. These
+are internal generated cases, not additional named test-function counts. Tests
+cover invalid coordinates, rank-zero and empty tensors, strided/noncontiguous
+layouts, right broadcasting, conversion, ownership/alias behavior, geometry,
+normalization, factor reconstruction, pseudoinverse identities, nonconvergence,
+integer overflow, and REPL malformed input/state preservation/output limits.
 
-Miri ran on the isolated 2026-10-29 nightly, rustc 1.101.0-nightly
-`92ffebece` (compiler commit dated 2026-10-28). It exercised element access,
-mutable rows/columns, empty slices, chained mutable/transpose views, disjoint
-mutation, and structural regressions. It did not interpret the full numerical
-suite; that suite ran under the normal debug and release test runners. The crate
-also forbids unsafe code. The separate Miri toolchain and caches live only in the
-Rust repository's ignored `.tools` directory.
+Both READMEs document tensor ownership differences, division behavior and supported
+commands. Shape checks are not disabled to obtain faster benchmark results. Nim
+accessors were inlined based on profiling; their explicit guards are retained.
+Hardware intrinsics are narrowly scoped and runtime-dispatched; no NEON execution
+on this x86 worker is claimed. Miri tests force a scalar dispatch because Miri
+does not execute the architecture kernels; ASan exercises the actual AVX code.
 
-## Numerical evidence
+See [roadmap coverage and timings](docs/ROADMAP.md),
+[profiling methodology](docs/PROFILING.md), and the committed profile/timing data.
+No package registry publication is part of these checks.
 
-Four fixed-seed property tests execute **416 generated cases**: 128 structural,
-128 SVD/QR/least-squares, 96 LU/Cholesky/symmetric-eigen, and 64 single-precision
-factor/residual cases. These cases are internal to the 41-test function count;
-they are not 416 additional test functions. The double-precision numerical tests
-compare with an independent development-only `nalgebra` oracle.
+## Rust packaging
 
-Additional fixtures cover exact expected arithmetic, invalid coordinates/shapes,
-empty shapes, integer limits, atomic checked assignment, mapping callback errors,
-nonfinite inputs/results, large/small scales, cancellation, scale-ratio overflow,
-rectangular/rank-deficient systems, repeated spectra, and nonconvergence.
-Reconstruction and orthogonality checks, all four Moore–Penrose identities,
-minimum-norm solutions, and scaled backward residuals validate algorithm behavior.
-Single-precision factor tests use norm-scaled residuals so entries near zero are
-not incorrectly judged against an unrelated local absolute scale.
-
-## Package and dependency review
-
-Default runtime dependencies are `num-traits` and `thiserror`, plus thiserror's
-Rust procedural-macro dependencies. Optional serde adds Rust-only serialization.
-The numerical oracle and property generator are development-only. The direct
-runtime dependencies declare `MIT OR Apache-2.0`. Following the owner's decision,
-the repository is also licensed under `MIT OR Apache-2.0`, at the recipient's
-option. Both license texts are included, with copyright attributed to
-farvanyoshi. Cargo package verification was repeated after adding the license
-metadata and no longer reports a missing-license warning. No crate publication
-was performed.
-
-`NUMERICS.md` records algorithm choices and floating-point limitations.
-`BENCHMARKS.md` records the exploratory kernel comparison and final longer-sample
-measurements. These checks establish the tested scope, not a guarantee of exact
-arithmetic, arbitrary ill-conditioned accuracy, or universal performance.
+`cargo package --list` and extracted-archive build verification are rerun after
+the final commit. Runtime dependencies are Rust-only; Criterion, the independent
+numerical oracle and property generator are development dependencies.

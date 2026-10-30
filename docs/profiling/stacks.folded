@@ -1,0 +1,3 @@
+main;std::rt::lang_start_internal;std::rt::lang_start::{{closure}};std::sys::backtrace::__rust_begin_short_backtrace;roadmap::main;roadmap::run;roadmap::naive;matrix_calc::matrix::Matrix<T>::try_from_fn 317
+??;??;??;_start;_dl_start;_dl_start_final;_dl_sysdep_start;dl_main 1
+main;std::rt::lang_start_internal;std::rt::lang_start::{{closure}};std::sys::backtrace::__rust_begin_short_backtrace;roadmap::main 1

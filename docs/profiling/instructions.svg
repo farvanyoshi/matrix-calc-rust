@@ -1,0 +1,129 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="205" viewBox="0 0 1400 205">
+<rect width="100%" height="100%" fill="white"/>
+<style>text{font-family:monospace;font-size:12px} .title{font-size:17px;font-weight:bold}</style>
+<text x="20" y="27" class="title">Callgrind instruction-attribution flame chart (flat self-cost)</text>
+<text x="20" y="52">Widths are executed instruction counts, not CPU time or inferred call stacks.</text>
+<g><title>matrix_calc::matrix::Matrix&lt;T&gt;::try_from_fn: 36,935,790 instructions</title><rect x="20.0000" y="89" width="1325.5562" height="43" fill="hsl(12,85%,58%)" stroke="white"/>
+<text x="24.0000" y="114">matrix_calc::matrix::Matrix&lt;T&gt;::try_from_fn</text>
+</g>
+<g><title>roadmap::main: 287,080 instructions</title><rect x="1345.5562" y="89" width="10.3028" height="43" fill="hsl(16,85%,63%)" stroke="white"/>
+</g>
+<g><title>0x000000000000e870: 220,149 instructions</title><rect x="1355.8590" y="89" width="7.9007" height="43" fill="hsl(20,85%,68%)" stroke="white"/>
+</g>
+<g><title>0x000000000000a220: 86,032 instructions</title><rect x="1363.7597" y="89" width="3.0875" height="43" fill="hsl(24,85%,73%)" stroke="white"/>
+</g>
+<g><title>0x0000000000064ff0: 48,832 instructions</title><rect x="1366.8473" y="89" width="1.7525" height="43" fill="hsl(28,85%,58%)" stroke="white"/>
+</g>
+<g><title>0x000000000000ae90: 46,586 instructions</title><rect x="1368.5997" y="89" width="1.6719" height="43" fill="hsl(32,85%,63%)" stroke="white"/>
+</g>
+<g><title>0x0000000000013780: 27,912 instructions</title><rect x="1370.2716" y="89" width="1.0017" height="43" fill="hsl(36,85%,68%)" stroke="white"/>
+</g>
+<g><title>0x0000000000024740: 25,926 instructions</title><rect x="1371.2733" y="89" width="0.9304" height="43" fill="hsl(40,85%,73%)" stroke="white"/>
+</g>
+<g><title>__strtoul_internal: 24,048 instructions</title><rect x="1372.2038" y="89" width="0.8630" height="43" fill="hsl(44,85%,58%)" stroke="white"/>
+</g>
+<g><title>0x000000000000a0a0: 14,970 instructions</title><rect x="1373.0668" y="89" width="0.5372" height="43" fill="hsl(12,85%,63%)" stroke="white"/>
+</g>
+<g><title>0x00000000000a0fe0: 12,591 instructions</title><rect x="1373.6041" y="89" width="0.4519" height="43" fill="hsl(16,85%,68%)" stroke="white"/>
+</g>
+<g><title>0x0000000000013e00: 12,520 instructions</title><rect x="1374.0559" y="89" width="0.4493" height="43" fill="hsl(20,85%,73%)" stroke="white"/>
+</g>
+<g><title>crossbeam_deque::deque::Stealer&lt;T&gt;::steal: 7,244 instructions</title><rect x="1374.5052" y="89" width="0.2600" height="43" fill="hsl(24,85%,58%)" stroke="white"/>
+</g>
+<g><title>crossbeam_epoch::default::with_handle: 5,924 instructions</title><rect x="1374.7652" y="89" width="0.2126" height="43" fill="hsl(28,85%,63%)" stroke="white"/>
+</g>
+<g><title>0x0000000000015f00: 5,366 instructions</title><rect x="1374.9778" y="89" width="0.1926" height="43" fill="hsl(32,85%,68%)" stroke="white"/>
+</g>
+<g><title>0x0000000000162880: 5,226 instructions</title><rect x="1375.1704" y="89" width="0.1876" height="43" fill="hsl(36,85%,73%)" stroke="white"/>
+</g>
+<g><title>0x0000000000007cb0: 5,119 instructions</title><rect x="1375.3579" y="89" width="0.1837" height="43" fill="hsl(40,85%,58%)" stroke="white"/>
+</g>
+<g><title>&lt;core::iter::adapters::chain::Chain&lt;A,B&gt; as core::iter::traits::iterator::Iterator&gt;::try_fold: 4,920 instructions</title><rect x="1375.5417" y="89" width="0.1766" height="43" fill="hsl(44,85%,63%)" stroke="white"/>
+</g>
+<g><title>_IO_sputbackc: 4,048 instructions</title><rect x="1375.7182" y="89" width="0.1453" height="43" fill="hsl(12,85%,68%)" stroke="white"/>
+</g>
+<g><title>getdelim: 3,813 instructions</title><rect x="1375.8635" y="89" width="0.1368" height="43" fill="hsl(16,85%,73%)" stroke="white"/>
+</g>
+<g><title>rayon_core::registry::WorkerThread::find_work: 3,600 instructions</title><rect x="1376.0003" y="89" width="0.1292" height="43" fill="hsl(20,85%,58%)" stroke="white"/>
+</g>
+<g><title>0x000000000009f380: 3,428 instructions</title><rect x="1376.1295" y="89" width="0.1230" height="43" fill="hsl(24,85%,63%)" stroke="white"/>
+</g>
+<g><title>malloc: 3,020 instructions</title><rect x="1376.2526" y="89" width="0.1084" height="43" fill="hsl(28,85%,68%)" stroke="white"/>
+</g>
+<g><title>getenv: 2,502 instructions</title><rect x="1376.3609" y="89" width="0.0898" height="43" fill="hsl(32,85%,73%)" stroke="white"/>
+</g>
+<g><title>0x00000000000147c0: 2,490 instructions</title><rect x="1376.4507" y="89" width="0.0894" height="43" fill="hsl(36,85%,58%)" stroke="white"/>
+</g>
+<g><title>__isoc23_sscanf: 2,254 instructions</title><rect x="1376.5401" y="89" width="0.0809" height="43" fill="hsl(40,85%,63%)" stroke="white"/>
+</g>
+<g><title>0x000000000000bf50: 2,227 instructions</title><rect x="1376.6210" y="89" width="0.0799" height="43" fill="hsl(44,85%,68%)" stroke="white"/>
+</g>
+<g><title>0x000000000008e140: 2,162 instructions</title><rect x="1376.7009" y="89" width="0.0776" height="43" fill="hsl(12,85%,73%)" stroke="white"/>
+</g>
+<g><title>free: 2,092 instructions</title><rect x="1376.7785" y="89" width="0.0751" height="43" fill="hsl(16,85%,58%)" stroke="white"/>
+</g>
+<g><title>calloc: 2,047 instructions</title><rect x="1376.8536" y="89" width="0.0735" height="43" fill="hsl(20,85%,63%)" stroke="white"/>
+</g>
+<g><title>0x0000000000161e80: 2,029 instructions</title><rect x="1376.9270" y="89" width="0.0728" height="43" fill="hsl(24,85%,68%)" stroke="white"/>
+</g>
+<g><title>0x0000000000003680: 1,954 instructions</title><rect x="1376.9999" y="89" width="0.0701" height="43" fill="hsl(28,85%,73%)" stroke="white"/>
+</g>
+<g><title>0x000000000001e600: 1,868 instructions</title><rect x="1377.0700" y="89" width="0.0670" height="43" fill="hsl(32,85%,58%)" stroke="white"/>
+</g>
+<g><title>0x00000000000093a0: 1,688 instructions</title><rect x="1377.1370" y="89" width="0.0606" height="43" fill="hsl(36,85%,63%)" stroke="white"/>
+</g>
+<g><title>0x00000000001655c0: 1,678 instructions</title><rect x="1377.1976" y="89" width="0.0602" height="43" fill="hsl(40,85%,68%)" stroke="white"/>
+</g>
+<g><title>pthread_getattr_np: 1,629 instructions</title><rect x="1377.2578" y="89" width="0.0585" height="43" fill="hsl(44,85%,73%)" stroke="white"/>
+</g>
+<g><title>crossbeam_deque::deque::Injector&lt;T&gt;::steal: 1,560 instructions</title><rect x="1377.3163" y="89" width="0.0560" height="43" fill="hsl(12,85%,58%)" stroke="white"/>
+</g>
+<g><title>0x00000000000a2520: 1,527 instructions</title><rect x="1377.3723" y="89" width="0.0548" height="43" fill="hsl(16,85%,63%)" stroke="white"/>
+</g>
+<g><title>_IO_setb: 1,301 instructions</title><rect x="1377.4271" y="89" width="0.0467" height="43" fill="hsl(20,85%,68%)" stroke="white"/>
+</g>
+<g><title>pthread_create: 1,148 instructions</title><rect x="1377.4738" y="89" width="0.0412" height="43" fill="hsl(24,85%,73%)" stroke="white"/>
+</g>
+<g><title>0x000000000008cd80: 1,083 instructions</title><rect x="1377.5150" y="89" width="0.0389" height="43" fill="hsl(28,85%,58%)" stroke="white"/>
+</g>
+<g><title>_dl_allocate_tls_init: 1,048 instructions</title><rect x="1377.5538" y="89" width="0.0376" height="43" fill="hsl(32,85%,63%)" stroke="white"/>
+</g>
+<g><title>0x000000000008cdf0: 1,041 instructions</title><rect x="1377.5914" y="89" width="0.0374" height="43" fill="hsl(36,85%,68%)" stroke="white"/>
+</g>
+<g><title>0x000000000001b390: 1,033 instructions</title><rect x="1377.6288" y="89" width="0.0371" height="43" fill="hsl(40,85%,73%)" stroke="white"/>
+</g>
+<g><title>0x000000000000c2a0: 1,021 instructions</title><rect x="1377.6659" y="89" width="0.0366" height="43" fill="hsl(44,85%,58%)" stroke="white"/>
+</g>
+<g><title>0x00000000000a2be0: 972 instructions</title><rect x="1377.7025" y="89" width="0.0349" height="43" fill="hsl(12,85%,63%)" stroke="white"/>
+</g>
+<g><title>0x000000000009ed80: 960 instructions</title><rect x="1377.7374" y="89" width="0.0345" height="43" fill="hsl(16,85%,68%)" stroke="white"/>
+</g>
+<g><title>crossbeam_epoch::internal::Local::register: 900 instructions</title><rect x="1377.7718" y="89" width="0.0323" height="43" fill="hsl(20,85%,73%)" stroke="white"/>
+</g>
+<g><title>core::slice::memchr::memrchr: 889 instructions</title><rect x="1377.8041" y="89" width="0.0319" height="43" fill="hsl(24,85%,58%)" stroke="white"/>
+</g>
+<g><title>0x00000000000148b0: 883 instructions</title><rect x="1377.8361" y="89" width="0.0317" height="43" fill="hsl(28,85%,63%)" stroke="white"/>
+</g>
+<g><title>getauxval: 870 instructions</title><rect x="1377.8677" y="89" width="0.0312" height="43" fill="hsl(32,85%,68%)" stroke="white"/>
+</g>
+<g><title>0x0000000000163280: 865 instructions</title><rect x="1377.8990" y="89" width="0.0310" height="43" fill="hsl(36,85%,73%)" stroke="white"/>
+</g>
+<g><title>0x000000000009eea0: 858 instructions</title><rect x="1377.9300" y="89" width="0.0308" height="43" fill="hsl(40,85%,58%)" stroke="white"/>
+</g>
+<g><title>0x0000000000006660: 852 instructions</title><rect x="1377.9608" y="89" width="0.0306" height="43" fill="hsl(44,85%,63%)" stroke="white"/>
+</g>
+<g><title>core::num::flt2dec::strategy::grisu::format_exact_opt: 851 instructions</title><rect x="1377.9914" y="89" width="0.0305" height="43" fill="hsl(12,85%,68%)" stroke="white"/>
+</g>
+<g><title>0x0000000000025d60: 830 instructions</title><rect x="1378.0219" y="89" width="0.0298" height="43" fill="hsl(16,85%,73%)" stroke="white"/>
+</g>
+<g><title>0x0000000000023da0: 821 instructions</title><rect x="1378.0517" y="89" width="0.0295" height="43" fill="hsl(20,85%,58%)" stroke="white"/>
+</g>
+<g><title>rayon_core::registry::WorkerThread::wait_until_cold: 816 instructions</title><rect x="1378.0812" y="89" width="0.0293" height="43" fill="hsl(24,85%,63%)" stroke="white"/>
+</g>
+<g><title>0x0000000000062580: 816 instructions</title><rect x="1378.1105" y="89" width="0.0293" height="43" fill="hsl(28,85%,68%)" stroke="white"/>
+</g>
+<g><title>__tunable_get_val: 815 instructions</title><rect x="1378.1397" y="89" width="0.0292" height="43" fill="hsl(32,85%,73%)" stroke="white"/>
+</g>
+<g><title>other measured functions: 51,020 instructions</title><rect x="1378.1690" y="89" width="1.8310" height="43" fill="hsl(36,85%,58%)" stroke="white"/>
+</g>
+<rect x="20" y="134" width="1360" height="35" fill="#e8b27a"/><text x="30" y="157">all collected function self-cost: 37,895,544 instructions</text><text x="20" y="191">See functions.csv / summary.json and callgraph.svg for named costs and measured edges.</text></svg>

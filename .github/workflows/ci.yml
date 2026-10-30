@@ -23,3 +23,6 @@ jobs:
       - run: cargo run --locked --example solve
       - run: cargo run --locked --example views
       - run: cargo package --locked --all-features
+      - run: cargo test --locked --test tensor --test vector --test accelerated --test repl
+      - run: printf 'A = Matrix.random(3,3)\nshape(A)\nquit\n' | cargo run --quiet --locked --bin matrix-calc
+      - run: cargo bench --locked --bench roadmap --no-run

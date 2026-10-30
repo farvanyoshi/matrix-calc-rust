@@ -7,6 +7,7 @@ use num_traits::{One, Zero};
 use std::ops::{Add, AddAssign, Mul};
 impl<T> Matrix<T> {
     /// Change dimensions without reordering elements; leave the matrix unchanged on validation failure.
+    /// Shape requirements: the new rows*cols equals the stored element count.
     pub fn try_reshape(&mut self, rows: usize, cols: usize) -> Result<()> {
         if crate::matrix::checked_size(rows, cols)? != self.len() {
             return Err(ShapeError::Reshape {
@@ -21,15 +22,18 @@ impl<T> Matrix<T> {
         Ok(())
     }
     /// Change dimensions in place; panics if the element count changes or dimensions overflow.
+    /// Shape requirements: the new rows*cols equals the stored element count.
     pub fn reshape(&mut self, rows: usize, cols: usize) {
         self.try_reshape(rows, cols).expect("invalid reshape")
     }
     /// Consume the matrix and change dimensions, preserving row-major element order.
+    /// Shape requirements: the new rows*cols equals the stored element count.
     pub fn try_reshaped(mut self, rows: usize, cols: usize) -> Result<Self> {
         self.try_reshape(rows, cols)?;
         Ok(self)
     }
     /// Consume and transpose without cloning elements; allocates temporary/output storage.
+    /// Shape requirements: any M×N shape produces N×M.
     pub fn into_transpose(self) -> Self {
         let rows = self.rows;
         let cols = self.cols;
@@ -37,6 +41,7 @@ impl<T> Matrix<T> {
         Self::from_fn(cols, rows, |r, c| data[c * cols + r].take().unwrap())
     }
     /// In-place transpose for square matrices; rectangular transpose uses `into_transpose`.
+    /// Shape requirements: the matrix is square N×N.
     pub fn transpose_in_place(&mut self) -> Result<()> {
         let n = self.square()?;
         for r in 0..n {
@@ -47,6 +52,7 @@ impl<T> Matrix<T> {
         Ok(())
     }
     /// Validate both row indices before exchanging their elements.
+    /// Shape requirements: both row indices lie in 0..rows.
     pub fn swap_rows(&mut self, a: usize, b: usize) -> Result<()> {
         for r in [a, b] {
             if r >= self.rows {
@@ -63,6 +69,7 @@ impl<T> Matrix<T> {
         Ok(())
     }
     /// Validate both column indices before exchanging their elements.
+    /// Shape requirements: both column indices lie in 0..cols.
     pub fn swap_cols(&mut self, a: usize, b: usize) -> Result<()> {
         for c in [a, b] {
             if c >= self.cols {
@@ -88,16 +95,19 @@ impl<T> Matrix<T> {
 }
 impl<T: Clone> Matrix<T> {
     /// Transpose logical axes; owned matrices clone, while views only exchange strides.
+    /// Shape requirements: any M×N shape produces N×M.
     pub fn transpose(&self) -> Self {
         self.view().transpose().to_owned()
     }
     /// Clone the main diagonal, of length `min(rows, cols)`.
+    /// Shape requirements: any valid stored layout; additional operand restrictions are documented above.
     pub fn diagonal(&self) -> Vec<T> {
         (0..self.rows.min(self.cols))
             .map(|i| self[(i, i)].clone())
             .collect()
     }
     /// Allocate a square matrix with the supplied diagonal and zeros elsewhere.
+    /// Shape requirements: a length-N diagonal produces an N×N result.
     pub fn from_diagonal(diagonal: &[T]) -> Self
     where
         T: Zero,
@@ -111,10 +121,12 @@ impl<T: Clone> Matrix<T> {
         })
     }
     /// Clone elements into nested row vectors, preserving empty rows.
+    /// Shape requirements: any valid stored layout; additional operand restrictions are documented above.
     pub fn to_rows(&self) -> Vec<Vec<T>> {
         self.iter_rows().map(<[T]>::to_vec).collect()
     }
     /// Validate row and replacement length before writing cloned elements.
+    /// Shape requirements: row lies in 0..rows and the replacement has cols elements.
     pub fn set_row(&mut self, row: usize, values: &[T]) -> Result<()> {
         if row >= self.rows {
             return Err(IndexError::RowOOB {
@@ -135,6 +147,7 @@ impl<T: Clone> Matrix<T> {
         Ok(())
     }
     /// Validate column and replacement length before writing cloned elements.
+    /// Shape requirements: col lies in 0..cols and the replacement has rows elements.
     pub fn set_col(&mut self, col: usize, values: &[T]) -> Result<()> {
         if col >= self.cols {
             return Err(IndexError::ColOOB {
@@ -157,6 +170,7 @@ impl<T: Clone> Matrix<T> {
         Ok(())
     }
     /// Allocate horizontal concatenation; row counts must match and dimensions must fit.
+    /// Shape requirements: A and B have the same row count; the combined column count fits usize.
     pub fn hcat(&self, other: &Self) -> Result<Self> {
         if self.rows != other.rows {
             return Err(self.dimension_error(other, "concatenate columns"));
@@ -177,6 +191,7 @@ impl<T: Clone> Matrix<T> {
         })
     }
     /// Allocate vertical concatenation; column counts must match and dimensions must fit.
+    /// Shape requirements: A and B have the same column count; the combined row count fits usize.
     pub fn vcat(&self, other: &Self) -> Result<Self> {
         if self.cols != other.cols {
             return Err(self.dimension_error(other, "concatenate rows"));
@@ -191,6 +206,7 @@ impl<T: Clone> Matrix<T> {
         Self::try_new(self.iter().chain(other).cloned(), rows, self.cols)
     }
     /// Validate the entire destination rectangle before cloning a readable block into it.
+    /// Shape requirements: the entire source rectangle fits inside the destination at (row,col).
     pub fn insert_block<R: MatrixRead<T>>(
         &mut self,
         row: usize,
@@ -212,6 +228,7 @@ impl<T: Clone> Matrix<T> {
         Ok(())
     }
     /// Multiply by an owned matrix or strided readable view without first copying the view.
+    /// Shape requirements: A=M×K and readable B=K×N.
     pub fn try_matmul_with<U: Clone, R: MatrixRead<U>>(
         &self,
         other: &R,
@@ -223,6 +240,7 @@ impl<T: Clone> Matrix<T> {
         crate::view::multiply(self, other)
     }
     /// Dot product of equally sized row/column vectors; uses ordinary scalar accumulation.
+    /// Shape requirements: both inputs are 1×N or N×1 with the same length N.
     pub fn dot(&self, other: &Self) -> Result<T>
     where
         T: Zero + Add<Output = T> + Mul<Output = T>,
@@ -236,6 +254,7 @@ impl<T: Clone> Matrix<T> {
             .fold(T::zero(), |s, (a, b)| s + a.clone() * b.clone()))
     }
     /// Outer product of row/column vectors, returning an `m×n` matrix.
+    /// Shape requirements: inputs are row/column vectors of lengths M and N; output is M×N.
     pub fn outer(&self, other: &Self) -> Result<Self>
     where
         T: Mul<Output = T>,
@@ -245,6 +264,7 @@ impl<T: Clone> Matrix<T> {
         Self::try_from_fn(m, n, |r, c| self.data[r].clone() * other.data[c].clone())
     }
     /// Sum all elements with ordinary scalar addition; an empty sum is zero.
+    /// Shape requirements: any valid stored layout; additional operand restrictions are documented above.
     pub fn sum(&self) -> T
     where
         T: Zero + Add<Output = T>,
@@ -252,6 +272,7 @@ impl<T: Clone> Matrix<T> {
         self.iter().cloned().fold(T::zero(), Add::add)
     }
     /// Multiply all elements; an empty product is one.
+    /// Shape requirements: any valid stored layout; additional operand restrictions are documented above.
     pub fn product(&self) -> T
     where
         T: One + Mul<Output = T>,
@@ -259,6 +280,7 @@ impl<T: Clone> Matrix<T> {
         self.iter().cloned().fold(T::one(), Mul::mul)
     }
     /// Sum the diagonal of a square matrix; nonsquare input is an error.
+    /// Shape requirements: input is square N×N; 0×0 has trace zero.
     pub fn trace(&self) -> Result<T>
     where
         T: Zero + Add<Output = T>,
@@ -267,6 +289,7 @@ impl<T: Clone> Matrix<T> {
         Ok((0..n).fold(T::zero(), |s, i| s + self[(i, i)].clone()))
     }
     /// Reduce each row to a sum, producing `rows×1`; empty groups sum to zero.
+    /// Shape requirements: any valid stored layout; additional operand restrictions are documented above.
     pub fn row_sums(&self) -> Self
     where
         T: Zero + Add<Output = T>,
@@ -280,6 +303,7 @@ impl<T: Clone> Matrix<T> {
         })
     }
     /// Reduce each column to a sum, producing `1×cols`; empty groups sum to zero.
+    /// Shape requirements: any valid stored layout; additional operand restrictions are documented above.
     pub fn col_sums(&self) -> Self
     where
         T: Zero + Add<Output = T>,
@@ -289,6 +313,7 @@ impl<T: Clone> Matrix<T> {
         })
     }
     /// Reduce each row to a product; empty groups multiply to one.
+    /// Shape requirements: any valid stored layout; additional operand restrictions are documented above.
     pub fn row_products(&self) -> Self
     where
         T: One + Mul<Output = T>,
@@ -302,6 +327,7 @@ impl<T: Clone> Matrix<T> {
         })
     }
     /// Reduce each column to a product; empty groups multiply to one.
+    /// Shape requirements: any valid stored layout; additional operand restrictions are documented above.
     pub fn col_products(&self) -> Self
     where
         T: One + Mul<Output = T>,
@@ -311,6 +337,7 @@ impl<T: Clone> Matrix<T> {
         })
     }
     /// First row-major minimum coordinate; empty or unordered input is an error.
+    /// Shape requirements: any valid stored layout; additional operand restrictions are documented above.
     pub fn argmin(&self) -> Result<(usize, usize)>
     where
         T: PartialOrd,
@@ -318,6 +345,7 @@ impl<T: Clone> Matrix<T> {
         self.argextreme(false)
     }
     /// First row-major maximum coordinate; empty or unordered input is an error.
+    /// Shape requirements: any valid stored layout; additional operand restrictions are documented above.
     pub fn argmax(&self) -> Result<(usize, usize)>
     where
         T: PartialOrd,
@@ -343,6 +371,7 @@ impl<T: Clone> Matrix<T> {
         Ok((best / self.cols, best % self.cols))
     }
     /// Clone the minimum element; empty or unordered input is an error.
+    /// Shape requirements: any valid stored layout; additional operand restrictions are documented above.
     pub fn min(&self) -> Result<T>
     where
         T: PartialOrd,
@@ -350,6 +379,7 @@ impl<T: Clone> Matrix<T> {
         Ok(self[self.argmin()?].clone())
     }
     /// Clone the maximum element; empty or unordered input is an error.
+    /// Shape requirements: any valid stored layout; additional operand restrictions are documented above.
     pub fn max(&self) -> Result<T>
     where
         T: PartialOrd,
@@ -357,6 +387,7 @@ impl<T: Clone> Matrix<T> {
         Ok(self[self.argmax()?].clone())
     }
     /// Nonnegative integer power of a square matrix using exponentiation by squaring.
+    /// Shape requirements: input is square N×N; exponent is nonnegative.
     pub fn pow(&self, mut exponent: u32) -> Result<Self>
     where
         T: Zero + One + Mul<Output = T> + AddAssign,
@@ -401,24 +432,29 @@ impl<T: Clone + PartialOrd> Matrix<T> {
         )
     }
     /// Row minima as `rows×1`; existing empty or unordered groups are errors.
+    /// Shape requirements: any valid stored layout; additional operand restrictions are documented above.
     pub fn row_mins(&self) -> Result<Self> {
         self.axis_extrema(true, false)
     }
     /// Row maxima as `rows×1`; existing empty or unordered groups are errors.
+    /// Shape requirements: any valid stored layout; additional operand restrictions are documented above.
     pub fn row_maxs(&self) -> Result<Self> {
         self.axis_extrema(true, true)
     }
     /// Column minima as `1×cols`; existing empty or unordered groups are errors.
+    /// Shape requirements: any valid stored layout; additional operand restrictions are documented above.
     pub fn col_mins(&self) -> Result<Self> {
         self.axis_extrema(false, false)
     }
     /// Column maxima as `1×cols`; existing empty or unordered groups are errors.
+    /// Shape requirements: any valid stored layout; additional operand restrictions are documented above.
     pub fn col_maxs(&self) -> Result<Self> {
         self.axis_extrema(false, true)
     }
 }
 impl<T: Clone + Mul<Output = T> + Zero + AddAssign> Matrix<T> {
     /// Multiply by a row- or column-shaped vector, returning a column vector.
+    /// Shape requirements: A=M×N; the vector has N elements in a row or column shape.
     pub fn matvec(&self, vector: &Self) -> Result<Self> {
         let n = vector.vector_len()?;
         if self.cols() != n {

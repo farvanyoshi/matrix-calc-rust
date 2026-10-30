@@ -15,6 +15,7 @@ pub struct Lu<T> {
 }
 impl<T: Real> Lu<T> {
     /// Compute this factorization with explicit numerical options; reject invalid input and exhausted iteration.
+    /// Shape requirements: finite N×N input.
     pub fn decompose(a: &Matrix<T>, options: DecompositionOptions<T>) -> Result<Self> {
         let n = a.square()?;
         let tol = options.resolve(n)?;
@@ -58,10 +59,12 @@ impl<T: Real> Lu<T> {
         })
     }
     /// Original row/column indices in the order described by this factorization.
+    /// Shape requirements: any valid stored layout; additional operand restrictions are documented above.
     pub fn permutation(&self) -> &[usize] {
         &self.permutation
     }
     /// Allocate the permutation matrix matching this factorization's documented convention.
+    /// Shape requirements: any valid stored layout; additional operand restrictions are documented above.
     pub fn permutation_matrix(&self) -> Matrix<T> {
         Matrix::from_fn(self.packed.rows(), self.packed.rows(), |r, c| {
             if self.permutation[r] == c {
@@ -72,6 +75,7 @@ impl<T: Real> Lu<T> {
         })
     }
     /// Allocate the lower factor in the original input units/convention.
+    /// Shape requirements: any valid stored layout; additional operand restrictions are documented above.
     pub fn lower(&self) -> Matrix<T> {
         let n = self.packed.rows();
         Matrix::from_fn(n, n, |r, c| match r.cmp(&c) {
@@ -81,6 +85,7 @@ impl<T: Real> Lu<T> {
         })
     }
     /// Allocate the upper factor in original input units.
+    /// Shape requirements: any valid stored layout; additional operand restrictions are documented above.
     pub fn upper(&self) -> Matrix<T> {
         let n = self.packed.rows();
         Matrix::from_fn(n, n, |r, c| {
@@ -92,10 +97,12 @@ impl<T: Real> Lu<T> {
         })
     }
     /// Whether any normalized LU pivot is at or below the selected threshold.
+    /// Shape requirements: any valid stored layout; additional operand restrictions are documented above.
     pub fn is_singular(&self) -> bool {
         (0..self.packed.rows()).any(|i| self.packed[(i, i)].abs() <= self.cutoff)
     }
     /// Solve using the retained factors; finite RHS dimensions must match the original input.
+    /// Shape requirements: retained A=N×N and B=N×K; A is numerically nonsingular.
     pub fn solve(&self, b: &Matrix<T>) -> Result<Matrix<T>> {
         let n = self.packed.rows();
         rhs(n, b)?;
@@ -126,10 +133,12 @@ impl<T: Real> Lu<T> {
         Ok(x)
     }
     /// Solve against identity to invert finite nonsingular square input.
+    /// Shape requirements: input is finite invertible N×N.
     pub fn inverse(&self) -> Result<Matrix<T>> {
         self.solve(&Matrix::try_identity(self.packed.rows())?)
     }
     /// Return determinant sign and log absolute magnitude; exact zero pivots give `(0, -infinity)`.
+    /// Shape requirements: input is finite N×N.
     pub fn sign_log_determinant(&self) -> (T, T) {
         let mut sign = if self.odd { -T::one() } else { T::one() };
         let mut log = number::<T>(self.packed.rows()) * self.scale.ln();
@@ -146,6 +155,7 @@ impl<T: Real> Lu<T> {
         (sign, log)
     }
     /// Uses exact zero pivots for determinant; solve singularity is tolerance-based.
+    /// Shape requirements: input is finite N×N.
     pub fn determinant(&self) -> T {
         let (sign, log) = self.sign_log_determinant();
         if sign == T::zero() {
@@ -157,6 +167,7 @@ impl<T: Real> Lu<T> {
 }
 impl<T: Real> Lu<T> {
     /// Solve Aᵀ X = B using the retained factors, without refactorizing.
+    /// Shape requirements: retained A=N×N and B=N×K.
     pub fn solve_transpose(&self, b: &Matrix<T>) -> Result<Matrix<T>> {
         let n = self.packed.rows();
         rhs(n, b)?;

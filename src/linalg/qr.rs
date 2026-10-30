@@ -16,6 +16,7 @@ pub struct Qr<T> {
 }
 impl<T: Real> Qr<T> {
     /// Compute this factorization with explicit numerical options; reject invalid input and exhausted iteration.
+    /// Shape requirements: finite M×N input.
     pub fn decompose(a: &Matrix<T>, pivot: bool, options: DecompositionOptions<T>) -> Result<Self> {
         let tol = options.resolve(a.rows().max(a.cols()))?;
         let (mut r, scale) = normalized(a)?;
@@ -74,10 +75,12 @@ impl<T: Real> Qr<T> {
         })
     }
     /// Original row/column indices in the order described by this factorization.
+    /// Shape requirements: any valid stored layout; additional operand restrictions are documented above.
     pub fn permutation(&self) -> &[usize] {
         &self.permutation
     }
     /// Allocate the permutation matrix matching this factorization's documented convention.
+    /// Shape requirements: any valid stored layout; additional operand restrictions are documented above.
     pub fn permutation_matrix(&self) -> Matrix<T> {
         Matrix::from_fn(self.r.cols(), self.r.cols(), |r, c| {
             if self.permutation[c] == r {
@@ -88,22 +91,26 @@ impl<T: Real> Qr<T> {
         })
     }
     /// Count R diagonal entries above the threshold; use pivoted QR for a rank-revealing estimate.
+    /// Shape requirements: any finite M×N input or its retained factorization.
     pub fn rank(&self) -> usize {
         (0..self.r.rows().min(self.r.cols()))
             .filter(|&i| self.r[(i, i)].abs() > self.cutoff)
             .count()
     }
     /// Economy R has min(m,n) rows; use `r_full` for the zero-padded form.
+    /// Shape requirements: any valid stored layout; additional operand restrictions are documented above.
     pub fn r(&self) -> Matrix<T> {
         Matrix::from_fn(self.r.rows().min(self.r.cols()), self.r.cols(), |r, c| {
             self.r[(r, c)] * self.scale
         })
     }
     /// Allocate the full zero-padded R in the original input units.
+    /// Shape requirements: any valid stored layout; additional operand restrictions are documented above.
     pub fn r_full(&self) -> Matrix<T> {
         self.r.scalar_mul(self.scale)
     }
     /// Allocate economy Q by applying the stored reflectors to a rectangular identity.
+    /// Shape requirements: any valid stored layout; additional operand restrictions are documented above.
     pub fn q(&self) -> Matrix<T> {
         self.apply_q(&Matrix::from_fn(
             self.r.rows(),
@@ -113,15 +120,18 @@ impl<T: Real> Qr<T> {
         .expect("valid identity")
     }
     /// Allocate full square Q by applying the stored reflectors to identity.
+    /// Shape requirements: any valid stored layout; additional operand restrictions are documented above.
     pub fn q_full(&self) -> Matrix<T> {
         self.apply_q(&Matrix::identity(self.r.rows()))
             .expect("valid identity")
     }
     /// Apply Q to finite RHS columns without materializing Q; row counts must match.
+    /// Shape requirements: Q is M×M and B has M rows.
     pub fn apply_q(&self, b: &Matrix<T>) -> Result<Matrix<T>> {
         self.apply(b, false)
     }
     /// Apply Qᵀ to finite RHS columns without materializing Q; row counts must match.
+    /// Shape requirements: Q is M×M and B has M rows.
     pub fn apply_q_transpose(&self, b: &Matrix<T>) -> Result<Matrix<T>> {
         self.apply(b, true)
     }
@@ -150,6 +160,7 @@ impl<T: Real> Qr<T> {
         Ok(out)
     }
     /// Full-column-rank least squares. Wide or deficient systems require SVD.
+    /// Shape requirements: retained A=M×N with M≥N and full column rank; B=M×K.
     pub fn solve(&self, b: &Matrix<T>) -> Result<Matrix<T>> {
         rhs(self.r.rows(), b)?;
         let n = self.r.cols();

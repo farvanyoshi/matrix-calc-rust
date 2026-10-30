@@ -1,0 +1,2544 @@
+{
+  "source": "callgrind.out",
+  "measurement": "Callgrind instruction events; not wall-clock CPU samples",
+  "events": {
+    "Ir": 37895546,
+    "Dr": 13008546,
+    "Dw": 2350923,
+    "I1mr": 2999,
+    "D1mr": 2128907,
+    "D1mw": 26872,
+    "ILmr": 2484,
+    "DLmr": 6876,
+    "DLmw": 12209
+  },
+  "self_cost_sum": 37895544,
+  "summary_instructions": 37895546,
+  "functions": [
+    {
+      "function": "matrix_calc::matrix::Matrix<T>::try_from_fn",
+      "self_instructions": 36935790,
+      "fraction": 0.9746736977835705
+    },
+    {
+      "function": "roadmap::main",
+      "self_instructions": 287080,
+      "fraction": 0.007575560862775845
+    },
+    {
+      "function": "0x000000000000e870",
+      "self_instructions": 220149,
+      "fraction": 0.005809363760551901
+    },
+    {
+      "function": "0x000000000000a220",
+      "self_instructions": 86032,
+      "fraction": 0.002270240532765541
+    },
+    {
+      "function": "0x0000000000064ff0",
+      "self_instructions": 48832,
+      "fraction": 0.0012885947751535114
+    },
+    {
+      "function": "0x000000000000ae90",
+      "self_instructions": 46586,
+      "fraction": 0.0012293265931213443
+    },
+    {
+      "function": "0x0000000000013780",
+      "self_instructions": 27912,
+      "fraction": 0.0007365509781308325
+    },
+    {
+      "function": "0x0000000000024740",
+      "self_instructions": 25926,
+      "fraction": 0.0006841437610712225
+    },
+    {
+      "function": "__strtoul_internal",
+      "self_instructions": 24048,
+      "fraction": 0.0006345864833079055
+    },
+    {
+      "function": "0x000000000000a0a0",
+      "self_instructions": 14970,
+      "fraction": 0.0003950332524583893
+    },
+    {
+      "function": "0x00000000000a0fe0",
+      "self_instructions": 12591,
+      "fraction": 0.00033225542295949094
+    },
+    {
+      "function": "0x0000000000013e00",
+      "self_instructions": 12520,
+      "fraction": 0.0003303818517554465
+    },
+    {
+      "function": "crossbeam_deque::deque::Stealer<T>::steal",
+      "self_instructions": 7244,
+      "fraction": 0.00019115703946617047
+    },
+    {
+      "function": "crossbeam_epoch::default::with_handle",
+      "self_instructions": 5924,
+      "fraction": 0.00015632444806703395
+    },
+    {
+      "function": "0x0000000000015f00",
+      "self_instructions": 5366,
+      "fraction": 0.0001415997617028535
+    },
+    {
+      "function": "0x0000000000162880",
+      "self_instructions": 5226,
+      "fraction": 0.00013790539594839963
+    },
+    {
+      "function": "0x0000000000007cb0",
+      "self_instructions": 5119,
+      "fraction": 0.00013508184497892418
+    },
+    {
+      "function": "<core::iter::adapters::chain::Chain<A,B> as core::iter::traits::iterator::Iterator>::try_fold",
+      "self_instructions": 4920,
+      "fraction": 0.00012983056794223615
+    },
+    {
+      "function": "_IO_sputbackc",
+      "self_instructions": 4048,
+      "fraction": 0.00010681994695735203
+    },
+    {
+      "function": "getdelim",
+      "self_instructions": 3813,
+      "fraction": 0.00010061869015523303
+    },
+    {
+      "function": "rayon_core::registry::WorkerThread::find_work",
+      "self_instructions": 3600,
+      "fraction": 9.499797654309964e-05
+    },
+    {
+      "function": "0x000000000009f380",
+      "self_instructions": 3428,
+      "fraction": 9.045918433048487e-05
+    },
+    {
+      "function": "malloc",
+      "self_instructions": 3020,
+      "fraction": 7.969274698893358e-05
+    },
+    {
+      "function": "getenv",
+      "self_instructions": 2502,
+      "fraction": 6.602359369745425e-05
+    },
+    {
+      "function": "0x00000000000147c0",
+      "self_instructions": 2490,
+      "fraction": 6.570693377564391e-05
+    },
+    {
+      "function": "__isoc23_sscanf",
+      "self_instructions": 2254,
+      "fraction": 5.9479288646707384e-05
+    },
+    {
+      "function": "0x000000000000bf50",
+      "self_instructions": 2227,
+      "fraction": 5.876680382263413e-05
+    },
+    {
+      "function": "0x000000000008e140",
+      "self_instructions": 2162,
+      "fraction": 5.705156257949484e-05
+    },
+    {
+      "function": "free",
+      "self_instructions": 2092,
+      "fraction": 5.52043797022679e-05
+    },
+    {
+      "function": "calloc",
+      "self_instructions": 2047,
+      "fraction": 5.401690499547915e-05
+    },
+    {
+      "function": "0x0000000000161e80",
+      "self_instructions": 2029,
+      "fraction": 5.354191511276365e-05
+    },
+    {
+      "function": "0x0000000000003680",
+      "self_instructions": 1954,
+      "fraction": 5.156279060144908e-05
+    },
+    {
+      "function": "0x000000000001e600",
+      "self_instructions": 1868,
+      "fraction": 4.9293394495141697e-05
+    },
+    {
+      "function": "0x00000000000093a0",
+      "self_instructions": 1688,
+      "fraction": 4.4543495667986714e-05
+    },
+    {
+      "function": "0x00000000001655c0",
+      "self_instructions": 1678,
+      "fraction": 4.427961239981144e-05
+    },
+    {
+      "function": "pthread_getattr_np",
+      "self_instructions": 1629,
+      "fraction": 4.298658438575258e-05
+    },
+    {
+      "function": "crossbeam_deque::deque::Injector<T>::steal",
+      "self_instructions": 1560,
+      "fraction": 4.1165789835343176e-05
+    },
+    {
+      "function": "0x00000000000a2520",
+      "self_instructions": 1527,
+      "fraction": 4.029497505036476e-05
+    },
+    {
+      "function": "_IO_setb",
+      "self_instructions": 1301,
+      "fraction": 3.4331213189603504e-05
+    },
+    {
+      "function": "pthread_create",
+      "self_instructions": 1148,
+      "fraction": 3.0293799186521773e-05
+    },
+    {
+      "function": "0x000000000008cd80",
+      "self_instructions": 1083,
+      "fraction": 2.8578557943382474e-05
+    },
+    {
+      "function": "_dl_allocate_tls_init",
+      "self_instructions": 1048,
+      "fraction": 2.7654966504769003e-05
+    },
+    {
+      "function": "0x000000000008cdf0",
+      "self_instructions": 1041,
+      "fraction": 2.747024821704631e-05
+    },
+    {
+      "function": "0x000000000001b390",
+      "self_instructions": 1033,
+      "fraction": 2.725914160250609e-05
+    },
+    {
+      "function": "0x000000000000c2a0",
+      "self_instructions": 1021,
+      "fraction": 2.6942481680695758e-05
+    },
+    {
+      "function": "0x00000000000a2be0",
+      "self_instructions": 972,
+      "fraction": 2.5649453666636902e-05
+    },
+    {
+      "function": "0x000000000009ed80",
+      "self_instructions": 960,
+      "fraction": 2.5332793744826567e-05
+    },
+    {
+      "function": "crossbeam_epoch::internal::Local::register",
+      "self_instructions": 900,
+      "fraction": 2.374949413577491e-05
+    },
+    {
+      "function": "core::slice::memchr::memrchr",
+      "self_instructions": 889,
+      "fraction": 2.3459222540782104e-05
+    },
+    {
+      "function": "0x00000000000148b0",
+      "self_instructions": 883,
+      "fraction": 2.3300892579876937e-05
+    },
+    {
+      "function": "getauxval",
+      "self_instructions": 870,
+      "fraction": 2.295784433124908e-05
+    },
+    {
+      "function": "0x0000000000163280",
+      "self_instructions": 865,
+      "fraction": 2.2825902697161438e-05
+    },
+    {
+      "function": "0x000000000009eea0",
+      "self_instructions": 858,
+      "fraction": 2.2641184409438744e-05
+    },
+    {
+      "function": "0x0000000000006660",
+      "self_instructions": 852,
+      "fraction": 2.248285444853358e-05
+    },
+    {
+      "function": "core::num::flt2dec::strategy::grisu::format_exact_opt",
+      "self_instructions": 851,
+      "fraction": 2.245646612171605e-05
+    },
+    {
+      "function": "0x0000000000025d60",
+      "self_instructions": 830,
+      "fraction": 2.190231125854797e-05
+    },
+    {
+      "function": "0x0000000000023da0",
+      "self_instructions": 821,
+      "fraction": 2.166481631719022e-05
+    },
+    {
+      "function": "rayon_core::registry::WorkerThread::wait_until_cold",
+      "self_instructions": 816,
+      "fraction": 2.1532874683102582e-05
+    },
+    {
+      "function": "0x0000000000062580",
+      "self_instructions": 816,
+      "fraction": 2.1532874683102582e-05
+    },
+    {
+      "function": "__tunable_get_val",
+      "self_instructions": 815,
+      "fraction": 2.1506486356285056e-05
+    },
+    {
+      "function": "0x00000000001666a0",
+      "self_instructions": 813,
+      "fraction": 2.145370970265e-05
+    },
+    {
+      "function": "0x0000000000024520",
+      "self_instructions": 780,
+      "fraction": 2.0582894917671588e-05
+    },
+    {
+      "function": "__rdl_alloc",
+      "self_instructions": 777,
+      "fraction": 2.0503729937219002e-05
+    },
+    {
+      "function": "0x000000000001de30",
+      "self_instructions": 705,
+      "fraction": 1.860377040635701e-05
+    },
+    {
+      "function": "crossbeam_deque::deque::Worker<T>::pop",
+      "self_instructions": 704,
+      "fraction": 1.8577382079539484e-05
+    },
+    {
+      "function": "0x0000000000023bb0",
+      "self_instructions": 684,
+      "fraction": 1.804961554318893e-05
+    },
+    {
+      "function": "0x00000000000a01a0",
+      "self_instructions": 680,
+      "fraction": 1.794406223591882e-05
+    },
+    {
+      "function": "0x00000000000062f0",
+      "self_instructions": 674,
+      "fraction": 1.7785732275013653e-05
+    },
+    {
+      "function": "0x00000000000076e0",
+      "self_instructions": 651,
+      "fraction": 1.7178800758210517e-05
+    },
+    {
+      "function": "rayon_core::registry::Registry::new",
+      "self_instructions": 622,
+      "fraction": 1.6413539280502216e-05
+    },
+    {
+      "function": "<std::io::buffered::linewritershim::LineWriterShim<W> as std::io::Write>::write_all",
+      "self_instructions": 621,
+      "fraction": 1.6387150953684686e-05
+    },
+    {
+      "function": "0x000000000008fa80",
+      "self_instructions": 600,
+      "fraction": 1.5832996090516605e-05
+    },
+    {
+      "function": "0x000000000009fd20",
+      "self_instructions": 591,
+      "fraction": 1.5595501149158856e-05
+    },
+    {
+      "function": "pthread_mutex_lock",
+      "self_instructions": 585,
+      "fraction": 1.5437171188253692e-05
+    },
+    {
+      "function": "pthread_mutex_unlock",
+      "self_instructions": 579,
+      "fraction": 1.5278841227348524e-05
+    },
+    {
+      "function": "0x000000000000bc70",
+      "self_instructions": 576,
+      "fraction": 1.519967624689594e-05
+    },
+    {
+      "function": "0x00000000000a1f90",
+      "self_instructions": 576,
+      "fraction": 1.519967624689594e-05
+    },
+    {
+      "function": "0x000000000001be40",
+      "self_instructions": 573,
+      "fraction": 1.5120511266443359e-05
+    },
+    {
+      "function": "<rayon_core::registry::WorkerThread as core::convert::From<rayon_core::registry::ThreadBuilder>>::from",
+      "self_instructions": 572,
+      "fraction": 1.509412293962583e-05
+    },
+    {
+      "function": "<std::io::Write::write_fmt::Adapter<T> as core::fmt::Write>::write_str",
+      "self_instructions": 568,
+      "fraction": 1.4988569632355719e-05
+    },
+    {
+      "function": "std::thread::Builder::spawn_unchecked",
+      "self_instructions": 563,
+      "fraction": 1.4856627998268081e-05
+    },
+    {
+      "function": "0x000000000001a800",
+      "self_instructions": 555,
+      "fraction": 1.464552138372786e-05
+    },
+    {
+      "function": "core::ffi::c_str::CStr::from_bytes_with_nul",
+      "self_instructions": 542,
+      "fraction": 1.43024731351e-05
+    },
+    {
+      "function": "0x0000000000016170",
+      "self_instructions": 504,
+      "fraction": 1.3299716716033948e-05
+    },
+    {
+      "function": "0x0000000000011840",
+      "self_instructions": 486,
+      "fraction": 1.2824726833318451e-05
+    },
+    {
+      "function": "posix_memalign",
+      "self_instructions": 465,
+      "fraction": 1.2270571970150368e-05
+    },
+    {
+      "function": "0x000000000000bda0",
+      "self_instructions": 462,
+      "fraction": 1.2191406989697786e-05
+    },
+    {
+      "function": "0x000000000008fad0",
+      "self_instructions": 450,
+      "fraction": 1.1874747067887455e-05
+    },
+    {
+      "function": "std::sys::pal::unix::stack_overflow::imp::make_handler",
+      "self_instructions": 449,
+      "fraction": 1.1848358741069927e-05
+    },
+    {
+      "function": "0x0000000000017e70",
+      "self_instructions": 441,
+      "fraction": 1.1637252126529705e-05
+    },
+    {
+      "function": "__cxa_thread_atexit_impl",
+      "self_instructions": 432,
+      "fraction": 1.1399757185171956e-05
+    },
+    {
+      "function": "_dl_catch_exception",
+      "self_instructions": 429,
+      "fraction": 1.1320592204719372e-05
+    },
+    {
+      "function": "0x0000000000025b80",
+      "self_instructions": 421,
+      "fraction": 1.110948559017915e-05
+    },
+    {
+      "function": "0x000000000001ade0",
+      "self_instructions": 405,
+      "fraction": 1.0687272361098709e-05
+    },
+    {
+      "function": "0x0000000000022ff0",
+      "self_instructions": 383,
+      "fraction": 1.01067291711131e-05
+    },
+    {
+      "function": "0x0000000000004c80",
+      "self_instructions": 379,
+      "fraction": 1.0001175863842989e-05
+    },
+    {
+      "function": "core::ops::function::FnOnce::call_once{{vtable.shim}}",
+      "self_instructions": 376,
+      "fraction": 9.922010883390407e-06
+    },
+    {
+      "function": "core::fmt::write",
+      "self_instructions": 370,
+      "fraction": 9.76368092248524e-06
+    },
+    {
+      "function": "0x000000000005a230",
+      "self_instructions": 364,
+      "fraction": 9.605350961580073e-06
+    },
+    {
+      "function": "__cpu_indicator_init",
+      "self_instructions": 361,
+      "fraction": 9.526185981127491e-06
+    },
+    {
+      "function": "0x000000000009f320",
+      "self_instructions": 354,
+      "fraction": 9.341467693404798e-06
+    },
+    {
+      "function": "mmap",
+      "self_instructions": 347,
+      "fraction": 9.156749405682104e-06
+    },
+    {
+      "function": "0x0000000000005d00",
+      "self_instructions": 346,
+      "fraction": 9.130361078864576e-06
+    },
+    {
+      "function": "std::sys::pal::unix::os::getenv::{{closure}}",
+      "self_instructions": 345,
+      "fraction": 9.103972752047048e-06
+    },
+    {
+      "function": "0x0000000000058880",
+      "self_instructions": 336,
+      "fraction": 8.866477810689299e-06
+    },
+    {
+      "function": "0x0000000000012670",
+      "self_instructions": 334,
+      "fraction": 8.813701157054243e-06
+    },
+    {
+      "function": "core::iter::traits::iterator::Iterator::unzip",
+      "self_instructions": 331,
+      "fraction": 8.734536176601661e-06
+    },
+    {
+      "function": "0x0000000000011940",
+      "self_instructions": 324,
+      "fraction": 8.549817888878967e-06
+    },
+    {
+      "function": "realloc",
+      "self_instructions": 318,
+      "fraction": 8.391487927973802e-06
+    },
+    {
+      "function": "__libc_sigaction",
+      "self_instructions": 312,
+      "fraction": 8.233157967068634e-06
+    },
+    {
+      "function": "crossbeam_epoch::internal::Global::try_advance",
+      "self_instructions": 310,
+      "fraction": 8.18038131343358e-06
+    },
+    {
+      "function": "<rayon_core::registry::DefaultSpawn as rayon_core::registry::ThreadSpawn>::spawn",
+      "self_instructions": 304,
+      "fraction": 8.022051352528413e-06
+    },
+    {
+      "function": "core::str::converts::from_utf8",
+      "self_instructions": 295,
+      "fraction": 7.784556411170665e-06
+    },
+    {
+      "function": "0x000000000009e390",
+      "self_instructions": 292,
+      "fraction": 7.705391430718081e-06
+    },
+    {
+      "function": "_dl_find_dso_for_object",
+      "self_instructions": 290,
+      "fraction": 7.652614777083025e-06
+    },
+    {
+      "function": "std::sys::pal::unix::thread::Thread::new",
+      "self_instructions": 287,
+      "fraction": 7.573449796630443e-06
+    },
+    {
+      "function": "0x0000000000023bc0",
+      "self_instructions": 285,
+      "fraction": 7.520673142995387e-06
+    },
+    {
+      "function": "0x0000000000005aa0",
+      "self_instructions": 281,
+      "fraction": 7.415119835725277e-06
+    },
+    {
+      "function": "0x0000000000004dd0",
+      "self_instructions": 281,
+      "fraction": 7.415119835725277e-06
+    },
+    {
+      "function": "<std::io::stdio::StderrLock as std::io::Write>::write_all",
+      "self_instructions": 280,
+      "fraction": 7.3887315089077496e-06
+    },
+    {
+      "function": "std_detect::detect::cache::detect_and_initialize",
+      "self_instructions": 279,
+      "fraction": 7.362343182090222e-06
+    },
+    {
+      "function": "0x00000000000a0530",
+      "self_instructions": 276,
+      "fraction": 7.283178201637639e-06
+    },
+    {
+      "function": "_IO_file_underflow",
+      "self_instructions": 272,
+      "fraction": 7.177624894367528e-06
+    },
+    {
+      "function": "std::env::_var",
+      "self_instructions": 270,
+      "fraction": 7.124848240732472e-06
+    },
+    {
+      "function": "core::num::flt2dec::to_exact_fixed_str",
+      "self_instructions": 270,
+      "fraction": 7.124848240732472e-06
+    },
+    {
+      "function": "0x0000000000022e60",
+      "self_instructions": 270,
+      "fraction": 7.124848240732472e-06
+    },
+    {
+      "function": "0x0000000000013760",
+      "self_instructions": 264,
+      "fraction": 6.9665182798273064e-06
+    },
+    {
+      "function": "0x0000000000007190",
+      "self_instructions": 260,
+      "fraction": 6.860964972557196e-06
+    },
+    {
+      "function": "0x000000000009eaf0",
+      "self_instructions": 260,
+      "fraction": 6.860964972557196e-06
+    },
+    {
+      "function": "0x0000000000092620",
+      "self_instructions": 244,
+      "fraction": 6.4387517434767525e-06
+    },
+    {
+      "function": "0x0000000000015a30",
+      "self_instructions": 228,
+      "fraction": 6.01653851439631e-06
+    },
+    {
+      "function": "alloc::raw_vec::RawVecInner<A>::reserve::do_reserve_and_handle",
+      "self_instructions": 224,
+      "fraction": 5.9109852071261995e-06
+    },
+    {
+      "function": "alloc::raw_vec::finish_grow",
+      "self_instructions": 224,
+      "fraction": 5.9109852071261995e-06
+    },
+    {
+      "function": "__cxa_finalize",
+      "self_instructions": 224,
+      "fraction": 5.9109852071261995e-06
+    },
+    {
+      "function": "std::thread::spawnhook::run_spawn_hooks",
+      "self_instructions": 223,
+      "fraction": 5.884596880308672e-06
+    },
+    {
+      "function": "0x000000000000c200",
+      "self_instructions": 220,
+      "fraction": 5.805431899856089e-06
+    },
+    {
+      "function": "0x0000000000092370",
+      "self_instructions": 220,
+      "fraction": 5.805431899856089e-06
+    },
+    {
+      "function": "0x000000000001a9a0",
+      "self_instructions": 215,
+      "fraction": 5.67349026576845e-06
+    },
+    {
+      "function": "0x000000000001af30",
+      "self_instructions": 212,
+      "fraction": 5.594325285315867e-06
+    },
+    {
+      "function": "0x0000000000016260",
+      "self_instructions": 212,
+      "fraction": 5.594325285315867e-06
+    },
+    {
+      "function": "0x00000000000232a0",
+      "self_instructions": 209,
+      "fraction": 5.515160304863284e-06
+    },
+    {
+      "function": "crossbeam_deque::deque::Worker<T>::new_lifo",
+      "self_instructions": 204,
+      "fraction": 5.383218670775646e-06
+    },
+    {
+      "function": "crossbeam_deque::deque::Worker<T>::new_fifo",
+      "self_instructions": 204,
+      "fraction": 5.383218670775646e-06
+    },
+    {
+      "function": "0x0000000000006e50",
+      "self_instructions": 204,
+      "fraction": 5.383218670775646e-06
+    },
+    {
+      "function": "0x0000000000110e00",
+      "self_instructions": 200,
+      "fraction": 5.277665363505535e-06
+    },
+    {
+      "function": "0x000000000008f340",
+      "self_instructions": 199,
+      "fraction": 5.251277036688008e-06
+    },
+    {
+      "function": "rayon_core::registry::ThreadBuilder::run",
+      "self_instructions": 196,
+      "fraction": 5.172112056235424e-06
+    },
+    {
+      "function": "0x0000000000005250",
+      "self_instructions": 192,
+      "fraction": 5.066558748965314e-06
+    },
+    {
+      "function": "std::sys::sync::once::futex::Once::call",
+      "self_instructions": 188,
+      "fraction": 4.961005441695203e-06
+    },
+    {
+      "function": "sched_yield",
+      "self_instructions": 188,
+      "fraction": 4.961005441695203e-06
+    },
+    {
+      "function": "std::thread::current::set_current",
+      "self_instructions": 184,
+      "fraction": 4.8554521344250925e-06
+    },
+    {
+      "function": "0x000000000008d710",
+      "self_instructions": 184,
+      "fraction": 4.8554521344250925e-06
+    },
+    {
+      "function": "0x0000000000012470",
+      "self_instructions": 180,
+      "fraction": 4.749898827154982e-06
+    },
+    {
+      "function": "pthread_attr_setaffinity_np",
+      "self_instructions": 180,
+      "fraction": 4.749898827154982e-06
+    },
+    {
+      "function": "0x0000000000001f70",
+      "self_instructions": 175,
+      "fraction": 4.617957193067343e-06
+    },
+    {
+      "function": "0x000000000009fad0",
+      "self_instructions": 174,
+      "fraction": 4.591568866249815e-06
+    },
+    {
+      "function": "<std::thread::spawnhook::SpawnHooks as core::ops::drop::Drop>::drop",
+      "self_instructions": 171,
+      "fraction": 4.512403885797232e-06
+    },
+    {
+      "function": "_IO_flush_all",
+      "self_instructions": 171,
+      "fraction": 4.512403885797232e-06
+    },
+    {
+      "function": "0x000000000000bad0",
+      "self_instructions": 169,
+      "fraction": 4.459627232162177e-06
+    },
+    {
+      "function": "pthread_setspecific",
+      "self_instructions": 165,
+      "fraction": 4.3540739248920665e-06
+    },
+    {
+      "function": "0x000000000001b140",
+      "self_instructions": 164,
+      "fraction": 4.327685598074539e-06
+    },
+    {
+      "function": "0x0000000000007ab0",
+      "self_instructions": 162,
+      "fraction": 4.274908944439484e-06
+    },
+    {
+      "function": "0x0000000000011770",
+      "self_instructions": 162,
+      "fraction": 4.274908944439484e-06
+    },
+    {
+      "function": "0x00000000000110a0",
+      "self_instructions": 161,
+      "fraction": 4.248520617621956e-06
+    },
+    {
+      "function": "std::thread::yield_now",
+      "self_instructions": 160,
+      "fraction": 4.222132290804428e-06
+    },
+    {
+      "function": "0x0000000000007090",
+      "self_instructions": 159,
+      "fraction": 4.195743963986901e-06
+    },
+    {
+      "function": "__underflow",
+      "self_instructions": 159,
+      "fraction": 4.195743963986901e-06
+    },
+    {
+      "function": "<alloc::vec::Vec<T> as alloc::vec::spec_from_iter::SpecFromIter<T,I>>::from_iter",
+      "self_instructions": 158,
+      "fraction": 4.169355637169373e-06
+    },
+    {
+      "function": "core::fmt::Formatter::write_formatted_parts",
+      "self_instructions": 157,
+      "fraction": 4.142967310351845e-06
+    },
+    {
+      "function": "<rayon_core::latch::LockLatch as rayon_core::latch::Latch>::set",
+      "self_instructions": 156,
+      "fraction": 4.116578983534317e-06
+    },
+    {
+      "function": "0x0000000000014f40",
+      "self_instructions": 156,
+      "fraction": 4.116578983534317e-06
+    },
+    {
+      "function": "0x000000000000ba00",
+      "self_instructions": 153,
+      "fraction": 4.037414003081734e-06
+    },
+    {
+      "function": "0x0000000000003640",
+      "self_instructions": 153,
+      "fraction": 4.037414003081734e-06
+    },
+    {
+      "function": "std::thread::spawnhook::ChildSpawnHooks::run",
+      "self_instructions": 152,
+      "fraction": 4.011025676264206e-06
+    },
+    {
+      "function": "alloc::vec::in_place_collect::<impl alloc::vec::spec_from_iter::SpecFromIter<T,I> for alloc::vec::Vec<T>>::from_iter",
+      "self_instructions": 152,
+      "fraction": 4.011025676264206e-06
+    },
+    {
+      "function": "0x0000000000092560",
+      "self_instructions": 148,
+      "fraction": 3.905472368994096e-06
+    },
+    {
+      "function": "crossbeam_epoch::sync::queue::Queue<T>::try_pop_if",
+      "self_instructions": 144,
+      "fraction": 3.799919061723985e-06
+    },
+    {
+      "function": "0x0000000000164c40",
+      "self_instructions": 144,
+      "fraction": 3.799919061723985e-06
+    },
+    {
+      "function": "0x0000000000110440",
+      "self_instructions": 144,
+      "fraction": 3.799919061723985e-06
+    },
+    {
+      "function": "<core::iter::adapters::inspect::Inspect<I,F> as core::iter::traits::iterator::Iterator>::next",
+      "self_instructions": 140,
+      "fraction": 3.6943657544538748e-06
+    },
+    {
+      "function": "0x0000000000006240",
+      "self_instructions": 140,
+      "fraction": 3.6943657544538748e-06
+    },
+    {
+      "function": "getline",
+      "self_instructions": 138,
+      "fraction": 3.6415891008188194e-06
+    },
+    {
+      "function": "std::thread::Thread::new_unnamed",
+      "self_instructions": 136,
+      "fraction": 3.588812447183764e-06
+    },
+    {
+      "function": "0x0000000000087a70",
+      "self_instructions": 132,
+      "fraction": 3.4832591399136532e-06
+    },
+    {
+      "function": "__sigsetjmp",
+      "self_instructions": 130,
+      "fraction": 3.430482486278598e-06
+    },
+    {
+      "function": "std::sys::backtrace::__rust_begin_short_backtrace",
+      "self_instructions": 129,
+      "fraction": 3.4040941594610704e-06
+    },
+    {
+      "function": "crossbeam_epoch::internal::Global::collect",
+      "self_instructions": 124,
+      "fraction": 3.2721525253734317e-06
+    },
+    {
+      "function": "_IO_switch_to_get_mode",
+      "self_instructions": 120,
+      "fraction": 3.166599218103321e-06
+    },
+    {
+      "function": "pthread_attr_init",
+      "self_instructions": 117,
+      "fraction": 3.087434237650738e-06
+    },
+    {
+      "function": "std::sys::thread_local::native::lazy::Storage<T,D>::initialize",
+      "self_instructions": 116,
+      "fraction": 3.0610459108332105e-06
+    },
+    {
+      "function": "<&std::io::stdio::Stdout as std::io::Write>::write_fmt",
+      "self_instructions": 112,
+      "fraction": 2.9554926035630997e-06
+    },
+    {
+      "function": "0x000000000001b220",
+      "self_instructions": 111,
+      "fraction": 2.929104276745572e-06
+    },
+    {
+      "function": "std::sys::pal::unix::stack_overflow::imp::init",
+      "self_instructions": 109,
+      "fraction": 2.8763276231105164e-06
+    },
+    {
+      "function": "_IO_file_fopen",
+      "self_instructions": 108,
+      "fraction": 2.849939296292989e-06
+    },
+    {
+      "function": "core::ops::function::FnOnce::call_once",
+      "self_instructions": 104,
+      "fraction": 2.744385989022878e-06
+    },
+    {
+      "function": "std::thread::local::LocalKey<T>::initialize_with",
+      "self_instructions": 104,
+      "fraction": 2.744385989022878e-06
+    },
+    {
+      "function": "0x00000000000a20c0",
+      "self_instructions": 104,
+      "fraction": 2.744385989022878e-06
+    },
+    {
+      "function": "sigaction",
+      "self_instructions": 100,
+      "fraction": 2.6388326817527674e-06
+    },
+    {
+      "function": "pthread_getaffinity_np",
+      "self_instructions": 100,
+      "fraction": 2.6388326817527674e-06
+    },
+    {
+      "function": "clone",
+      "self_instructions": 100,
+      "fraction": 2.6388326817527674e-06
+    },
+    {
+      "function": "core::num::flt2dec::strategy::grisu::format_exact_opt::possibly_round",
+      "self_instructions": 98,
+      "fraction": 2.586056028117712e-06
+    },
+    {
+      "function": "0x000000000009a700",
+      "self_instructions": 98,
+      "fraction": 2.586056028117712e-06
+    },
+    {
+      "function": "std::sync::poison::once::Once::call_once::{{closure}}",
+      "self_instructions": 96,
+      "fraction": 2.533279374482657e-06
+    },
+    {
+      "function": "core::fmt::Formatter::pad_integral",
+      "self_instructions": 96,
+      "fraction": 2.533279374482657e-06
+    },
+    {
+      "function": "__rdl_alloc_zeroed",
+      "self_instructions": 95,
+      "fraction": 2.506891047665129e-06
+    },
+    {
+      "function": "0x0000000000011f40",
+      "self_instructions": 95,
+      "fraction": 2.506891047665129e-06
+    },
+    {
+      "function": "0x000000000001a900",
+      "self_instructions": 92,
+      "fraction": 2.4277260672125463e-06
+    },
+    {
+      "function": "snprintf",
+      "self_instructions": 92,
+      "fraction": 2.4277260672125463e-06
+    },
+    {
+      "function": "__libc_early_init",
+      "self_instructions": 91,
+      "fraction": 2.4013377403950184e-06
+    },
+    {
+      "function": "0x0000000000005e20",
+      "self_instructions": 90,
+      "fraction": 2.374949413577491e-06
+    },
+    {
+      "function": "0x0000000000012d50",
+      "self_instructions": 90,
+      "fraction": 2.374949413577491e-06
+    },
+    {
+      "function": "_IO_link_in",
+      "self_instructions": 90,
+      "fraction": 2.374949413577491e-06
+    },
+    {
+      "function": "0x0000000000025d00",
+      "self_instructions": 89,
+      "fraction": 2.348561086759963e-06
+    },
+    {
+      "function": "0x000000000009e3b0",
+      "self_instructions": 87,
+      "fraction": 2.2957844331249076e-06
+    },
+    {
+      "function": "0x0000000000042050",
+      "self_instructions": 83,
+      "fraction": 2.1902311258547972e-06
+    },
+    {
+      "function": "<alloc::vec::into_iter::IntoIter<T,A> as core::ops::drop::Drop>::drop",
+      "self_instructions": 81,
+      "fraction": 2.137454472219742e-06
+    },
+    {
+      "function": "0x0000000000022d50",
+      "self_instructions": 80,
+      "fraction": 2.111066145402214e-06
+    },
+    {
+      "function": "pthread_attr_destroy",
+      "self_instructions": 80,
+      "fraction": 2.111066145402214e-06
+    },
+    {
+      "function": "(below main)",
+      "self_instructions": 80,
+      "fraction": 2.111066145402214e-06
+    },
+    {
+      "function": "__ctype_init",
+      "self_instructions": 80,
+      "fraction": 2.111066145402214e-06
+    },
+    {
+      "function": "0x0000000000014740",
+      "self_instructions": 79,
+      "fraction": 2.0846778185846864e-06
+    },
+    {
+      "function": "0x0000000000022f40",
+      "self_instructions": 76,
+      "fraction": 2.005512838132103e-06
+    },
+    {
+      "function": "0x000000000015fa30",
+      "self_instructions": 74,
+      "fraction": 1.952736184497048e-06
+    },
+    {
+      "function": "core::ptr::drop_in_place<[alloc::boxed::Box<dyn core::ops::function::FnOnce<()>+Output = ()+core::marker::Send>]>",
+      "self_instructions": 72,
+      "fraction": 1.8999595308619926e-06
+    },
+    {
+      "function": "0x0000000000007670",
+      "self_instructions": 72,
+      "fraction": 1.8999595308619926e-06
+    },
+    {
+      "function": "0x000000000008f3c0",
+      "self_instructions": 72,
+      "fraction": 1.8999595308619926e-06
+    },
+    {
+      "function": "0x0000000000015890",
+      "self_instructions": 71,
+      "fraction": 1.8735712040444649e-06
+    },
+    {
+      "function": "core::fmt::num::imp::<impl core::fmt::Display for u64>::fmt",
+      "self_instructions": 70,
+      "fraction": 1.8471828772269374e-06
+    },
+    {
+      "function": "getpagesize",
+      "self_instructions": 70,
+      "fraction": 1.8471828772269374e-06
+    },
+    {
+      "function": "0x00000000000909d0",
+      "self_instructions": 70,
+      "fraction": 1.8471828772269374e-06
+    },
+    {
+      "function": "bcmp",
+      "self_instructions": 69,
+      "fraction": 1.8207945504094097e-06
+    },
+    {
+      "function": "std::rt::lang_start_internal",
+      "self_instructions": 68,
+      "fraction": 1.794406223591882e-06
+    },
+    {
+      "function": "alloc::sync::arcinner_layout_for_value_layout",
+      "self_instructions": 68,
+      "fraction": 1.794406223591882e-06
+    },
+    {
+      "function": "0x0000000000059d20",
+      "self_instructions": 68,
+      "fraction": 1.794406223591882e-06
+    },
+    {
+      "function": "_IO_un_link",
+      "self_instructions": 68,
+      "fraction": 1.794406223591882e-06
+    },
+    {
+      "function": "rayon_core::ThreadPoolBuilder<S>::get_num_threads",
+      "self_instructions": 67,
+      "fraction": 1.7680178967743543e-06
+    },
+    {
+      "function": "mprotect",
+      "self_instructions": 65,
+      "fraction": 1.715241243139299e-06
+    },
+    {
+      "function": "std::io::stdio::print_to_buffer_if_capture_used",
+      "self_instructions": 63,
+      "fraction": 1.6624645895042435e-06
+    },
+    {
+      "function": "__rust_alloc",
+      "self_instructions": 63,
+      "fraction": 1.6624645895042435e-06
+    },
+    {
+      "function": "write",
+      "self_instructions": 63,
+      "fraction": 1.6624645895042435e-06
+    },
+    {
+      "function": "0x0000000000013070",
+      "self_instructions": 62,
+      "fraction": 1.6360762626867158e-06
+    },
+    {
+      "function": "std::io::buffered::bufwriter::BufWriter<W>::flush_buf",
+      "self_instructions": 61,
+      "fraction": 1.6096879358691881e-06
+    },
+    {
+      "function": "std::sys::pal::unix::thread::Thread::new::thread_start",
+      "self_instructions": 60,
+      "fraction": 1.5832996090516604e-06
+    },
+    {
+      "function": "core::num::flt2dec::digits_to_dec_str",
+      "self_instructions": 60,
+      "fraction": 1.5832996090516604e-06
+    },
+    {
+      "function": "0x00000000000f7e70",
+      "self_instructions": 60,
+      "fraction": 1.5832996090516604e-06
+    },
+    {
+      "function": "fclose",
+      "self_instructions": 59,
+      "fraction": 1.556911282234133e-06
+    },
+    {
+      "function": "std::io::stdio::_print",
+      "self_instructions": 57,
+      "fraction": 1.5041346285990776e-06
+    },
+    {
+      "function": "<&std::io::stdio::Stderr as std::io::Write>::write_fmt",
+      "self_instructions": 56,
+      "fraction": 1.4777463017815499e-06
+    },
+    {
+      "function": "std::io::stdio::cleanup",
+      "self_instructions": 55,
+      "fraction": 1.4513579749640222e-06
+    },
+    {
+      "function": "sigaltstack",
+      "self_instructions": 55,
+      "fraction": 1.4513579749640222e-06
+    },
+    {
+      "function": "std::sys::pal::unix::init",
+      "self_instructions": 53,
+      "fraction": 1.3985813213289668e-06
+    },
+    {
+      "function": "0x000000000001e500",
+      "self_instructions": 53,
+      "fraction": 1.3985813213289668e-06
+    },
+    {
+      "function": "__rdl_dealloc",
+      "self_instructions": 52,
+      "fraction": 1.372192994511439e-06
+    },
+    {
+      "function": "0x000000000008fc70",
+      "self_instructions": 52,
+      "fraction": 1.372192994511439e-06
+    },
+    {
+      "function": "_IO_file_close_it",
+      "self_instructions": 50,
+      "fraction": 1.3194163408763837e-06
+    },
+    {
+      "function": "0x000000000001ad20",
+      "self_instructions": 48,
+      "fraction": 1.2666396872413285e-06
+    },
+    {
+      "function": "pthread_detach",
+      "self_instructions": 48,
+      "fraction": 1.2666396872413285e-06
+    },
+    {
+      "function": "strlen",
+      "self_instructions": 48,
+      "fraction": 1.2666396872413285e-06
+    },
+    {
+      "function": "strnlen",
+      "self_instructions": 48,
+      "fraction": 1.2666396872413285e-06
+    },
+    {
+      "function": "wcschr",
+      "self_instructions": 48,
+      "fraction": 1.2666396872413285e-06
+    },
+    {
+      "function": "__pthread_get_minstack",
+      "self_instructions": 48,
+      "fraction": 1.2666396872413285e-06
+    },
+    {
+      "function": "sysconf",
+      "self_instructions": 47,
+      "fraction": 1.2402513604238008e-06
+    },
+    {
+      "function": "sbrk",
+      "self_instructions": 47,
+      "fraction": 1.2402513604238008e-06
+    },
+    {
+      "function": "_IO_file_doallocate",
+      "self_instructions": 47,
+      "fraction": 1.2402513604238008e-06
+    },
+    {
+      "function": "roadmap::inputs",
+      "self_instructions": 45,
+      "fraction": 1.1874747067887454e-06
+    },
+    {
+      "function": "<crossbeam_epoch::collector::Collector as core::default::Default>::default",
+      "self_instructions": 45,
+      "fraction": 1.1874747067887454e-06
+    },
+    {
+      "function": "core::fmt::Formatter::pad_formatted_parts",
+      "self_instructions": 44,
+      "fraction": 1.1610863799712177e-06
+    },
+    {
+      "function": "std::thread::Thread::cname",
+      "self_instructions": 44,
+      "fraction": 1.1610863799712177e-06
+    },
+    {
+      "function": "0x00000000000024a0",
+      "self_instructions": 44,
+      "fraction": 1.1610863799712177e-06
+    },
+    {
+      "function": "syscall",
+      "self_instructions": 44,
+      "fraction": 1.1610863799712177e-06
+    },
+    {
+      "function": "memset",
+      "self_instructions": 44,
+      "fraction": 1.1610863799712177e-06
+    },
+    {
+      "function": "wmemchr",
+      "self_instructions": 44,
+      "fraction": 1.1610863799712177e-06
+    },
+    {
+      "function": "fopen",
+      "self_instructions": 44,
+      "fraction": 1.1610863799712177e-06
+    },
+    {
+      "function": "0x0000000000029a20",
+      "self_instructions": 43,
+      "fraction": 1.13469805315369e-06
+    },
+    {
+      "function": "pthread_key_create",
+      "self_instructions": 43,
+      "fraction": 1.13469805315369e-06
+    },
+    {
+      "function": "core::fmt::float::float_to_decimal_common_exact",
+      "self_instructions": 42,
+      "fraction": 1.1083097263361624e-06
+    },
+    {
+      "function": "std::env::var_os",
+      "self_instructions": 42,
+      "fraction": 1.1083097263361624e-06
+    },
+    {
+      "function": "std::io::Write::write_all",
+      "self_instructions": 42,
+      "fraction": 1.1083097263361624e-06
+    },
+    {
+      "function": "0x0000000000012d00",
+      "self_instructions": 42,
+      "fraction": 1.1083097263361624e-06
+    },
+    {
+      "function": "memcpy",
+      "self_instructions": 42,
+      "fraction": 1.1083097263361624e-06
+    },
+    {
+      "function": "memmove",
+      "self_instructions": 42,
+      "fraction": 1.1083097263361624e-06
+    },
+    {
+      "function": "0x000000000001b3f0",
+      "self_instructions": 41,
+      "fraction": 1.0819213995186347e-06
+    },
+    {
+      "function": "0x000000000000bec0",
+      "self_instructions": 41,
+      "fraction": 1.0819213995186347e-06
+    },
+    {
+      "function": "core::fmt::Formatter::pad_integral::write_prefix",
+      "self_instructions": 40,
+      "fraction": 1.055533072701107e-06
+    },
+    {
+      "function": "std::sys::thread_local::destructors::linux_like::register",
+      "self_instructions": 40,
+      "fraction": 1.055533072701107e-06
+    },
+    {
+      "function": "std::sync::poison::condvar::Condvar::notify_all",
+      "self_instructions": 40,
+      "fraction": 1.055533072701107e-06
+    },
+    {
+      "function": "0x000000000001dd60",
+      "self_instructions": 40,
+      "fraction": 1.055533072701107e-06
+    },
+    {
+      "function": "pthread_attr_getstack",
+      "self_instructions": 40,
+      "fraction": 1.055533072701107e-06
+    },
+    {
+      "function": "munmap",
+      "self_instructions": 40,
+      "fraction": 1.055533072701107e-06
+    },
+    {
+      "function": "0x00000000001103d0",
+      "self_instructions": 40,
+      "fraction": 1.055533072701107e-06
+    },
+    {
+      "function": "matrix_calc::matrix::checked_size",
+      "self_instructions": 39,
+      "fraction": 1.0291447458835793e-06
+    },
+    {
+      "function": "__cxa_atexit",
+      "self_instructions": 39,
+      "fraction": 1.0291447458835793e-06
+    },
+    {
+      "function": "std::sys::thread_local::key::racy::LazyKey::lazy_init",
+      "self_instructions": 38,
+      "fraction": 1.0027564190660516e-06
+    },
+    {
+      "function": "0x0000000000005310",
+      "self_instructions": 38,
+      "fraction": 1.0027564190660516e-06
+    },
+    {
+      "function": "_IO_enable_locks",
+      "self_instructions": 38,
+      "fraction": 1.0027564190660516e-06
+    },
+    {
+      "function": "0x000000000008e9e0",
+      "self_instructions": 38,
+      "fraction": 1.0027564190660516e-06
+    },
+    {
+      "function": "0x0000000000167470",
+      "self_instructions": 38,
+      "fraction": 1.0027564190660516e-06
+    },
+    {
+      "function": "std::thread::ThreadId::new",
+      "self_instructions": 36,
+      "fraction": 9.499797654309963e-07
+    },
+    {
+      "function": "std::sys::exit_guard::unique_thread_exit",
+      "self_instructions": 36,
+      "fraction": 9.499797654309963e-07
+    },
+    {
+      "function": "0x0000000000012270",
+      "self_instructions": 36,
+      "fraction": 9.499797654309963e-07
+    },
+    {
+      "function": "wmemset",
+      "self_instructions": 36,
+      "fraction": 9.499797654309963e-07
+    },
+    {
+      "function": "0x000000000001cc10",
+      "self_instructions": 34,
+      "fraction": 8.97203111795941e-07
+    },
+    {
+      "function": "0x00000000000aaa10",
+      "self_instructions": 34,
+      "fraction": 8.97203111795941e-07
+    },
+    {
+      "function": "_IO_file_open",
+      "self_instructions": 33,
+      "fraction": 8.708147849784133e-07
+    },
+    {
+      "function": "std::sys::pal::unix::time::Timespec::now",
+      "self_instructions": 32,
+      "fraction": 8.444264581608856e-07
+    },
+    {
+      "function": "std::sys::pal::unix::time::Timespec::sub_timespec",
+      "self_instructions": 32,
+      "fraction": 8.444264581608856e-07
+    },
+    {
+      "function": "_dl_allocate_tls",
+      "self_instructions": 32,
+      "fraction": 8.444264581608856e-07
+    },
+    {
+      "function": "dlsym",
+      "self_instructions": 32,
+      "fraction": 8.444264581608856e-07
+    },
+    {
+      "function": "signal",
+      "self_instructions": 32,
+      "fraction": 8.444264581608856e-07
+    },
+    {
+      "function": "roadmap::run",
+      "self_instructions": 31,
+      "fraction": 8.180381313433579e-07
+    },
+    {
+      "function": "rayon_core::registry::global_registry",
+      "self_instructions": 31,
+      "fraction": 8.180381313433579e-07
+    },
+    {
+      "function": "0x0000000000025f00",
+      "self_instructions": 31,
+      "fraction": 8.180381313433579e-07
+    },
+    {
+      "function": "0x0000000000041980",
+      "self_instructions": 31,
+      "fraction": 8.180381313433579e-07
+    },
+    {
+      "function": "0x0000000000023090",
+      "self_instructions": 30,
+      "fraction": 7.916498045258302e-07
+    },
+    {
+      "function": "0x00000000000034a0",
+      "self_instructions": 30,
+      "fraction": 7.916498045258302e-07
+    },
+    {
+      "function": "0x0000000000004510",
+      "self_instructions": 30,
+      "fraction": 7.916498045258302e-07
+    },
+    {
+      "function": "roadmap::naive",
+      "self_instructions": 29,
+      "fraction": 7.652614777083026e-07
+    },
+    {
+      "function": "core::fmt::Formatter::pad",
+      "self_instructions": 29,
+      "fraction": 7.652614777083026e-07
+    },
+    {
+      "function": "0x00000000000bb6a0",
+      "self_instructions": 29,
+      "fraction": 7.652614777083026e-07
+    },
+    {
+      "function": "0x000000000001d8d0",
+      "self_instructions": 28,
+      "fraction": 7.388731508907749e-07
+    },
+    {
+      "function": "std::sync::poison::once::Once::call_once_force::{{closure}}",
+      "self_instructions": 27,
+      "fraction": 7.124848240732472e-07
+    },
+    {
+      "function": "0x00000000000230d0",
+      "self_instructions": 27,
+      "fraction": 7.124848240732472e-07
+    },
+    {
+      "function": "0x0000000000003420",
+      "self_instructions": 27,
+      "fraction": 7.124848240732472e-07
+    },
+    {
+      "function": "std::time::Instant::elapsed",
+      "self_instructions": 26,
+      "fraction": 6.860964972557195e-07
+    },
+    {
+      "function": "__call_tls_dtors",
+      "self_instructions": 26,
+      "fraction": 6.860964972557195e-07
+    },
+    {
+      "function": "core::ptr::drop_in_place<rayon_core::ThreadPoolBuilder>",
+      "self_instructions": 25,
+      "fraction": 6.597081704381919e-07
+    },
+    {
+      "function": "0x0000000000022c50",
+      "self_instructions": 25,
+      "fraction": 6.597081704381919e-07
+    },
+    {
+      "function": "0x0000000000022d70",
+      "self_instructions": 25,
+      "fraction": 6.597081704381919e-07
+    },
+    {
+      "function": "__read_nocancel",
+      "self_instructions": 25,
+      "fraction": 6.597081704381919e-07
+    },
+    {
+      "function": "0x0000000000095190",
+      "self_instructions": 25,
+      "fraction": 6.597081704381919e-07
+    },
+    {
+      "function": "core::fmt::float::<impl core::fmt::Display for f64>::fmt",
+      "self_instructions": 24,
+      "fraction": 6.333198436206643e-07
+    },
+    {
+      "function": "std::io::stdio::_eprint",
+      "self_instructions": 24,
+      "fraction": 6.333198436206643e-07
+    },
+    {
+      "function": "crossbeam_epoch::default::collector",
+      "self_instructions": 24,
+      "fraction": 6.333198436206643e-07
+    },
+    {
+      "function": "0x000000000001ae80",
+      "self_instructions": 24,
+      "fraction": 6.333198436206643e-07
+    },
+    {
+      "function": "0x0000000000018570",
+      "self_instructions": 24,
+      "fraction": 6.333198436206643e-07
+    },
+    {
+      "function": "0x0000000000018730",
+      "self_instructions": 24,
+      "fraction": 6.333198436206643e-07
+    },
+    {
+      "function": "rindex",
+      "self_instructions": 24,
+      "fraction": 6.333198436206643e-07
+    },
+    {
+      "function": "wcscmp",
+      "self_instructions": 24,
+      "fraction": 6.333198436206643e-07
+    },
+    {
+      "function": "strchrnul",
+      "self_instructions": 24,
+      "fraction": 6.333198436206643e-07
+    },
+    {
+      "function": "memrchr",
+      "self_instructions": 24,
+      "fraction": 6.333198436206643e-07
+    },
+    {
+      "function": "0x0000000000029c30",
+      "self_instructions": 24,
+      "fraction": 6.333198436206643e-07
+    },
+    {
+      "function": "pthread_attr_setstacksize",
+      "self_instructions": 24,
+      "fraction": 6.333198436206643e-07
+    },
+    {
+      "function": "0x0000000000001f00",
+      "self_instructions": 23,
+      "fraction": 6.069315168031366e-07
+    },
+    {
+      "function": "0x000000000000e710",
+      "self_instructions": 23,
+      "fraction": 6.069315168031366e-07
+    },
+    {
+      "function": "wmemcmp",
+      "self_instructions": 23,
+      "fraction": 6.069315168031366e-07
+    },
+    {
+      "function": "_IO_doallocbuf",
+      "self_instructions": 23,
+      "fraction": 6.069315168031366e-07
+    },
+    {
+      "function": "__open_nocancel",
+      "self_instructions": 23,
+      "fraction": 6.069315168031366e-07
+    },
+    {
+      "function": "0x0000000000029b00",
+      "self_instructions": 22,
+      "fraction": 5.805431899856089e-07
+    },
+    {
+      "function": "__memset_chk",
+      "self_instructions": 22,
+      "fraction": 5.805431899856089e-07
+    },
+    {
+      "function": "memchr",
+      "self_instructions": 22,
+      "fraction": 5.805431899856089e-07
+    },
+    {
+      "function": "crossbeam_epoch::sync::once_lock::OnceLock<T>::initialize",
+      "self_instructions": 21,
+      "fraction": 5.541548631680812e-07
+    },
+    {
+      "function": "std::sync::once_lock::OnceLock<T>::initialize",
+      "self_instructions": 21,
+      "fraction": 5.541548631680812e-07
+    },
+    {
+      "function": "__memcpy_chk",
+      "self_instructions": 21,
+      "fraction": 5.541548631680812e-07
+    },
+    {
+      "function": "__memmove_chk",
+      "self_instructions": 21,
+      "fraction": 5.541548631680812e-07
+    },
+    {
+      "function": "mempcpy",
+      "self_instructions": 21,
+      "fraction": 5.541548631680812e-07
+    },
+    {
+      "function": "__mempcpy_chk",
+      "self_instructions": 21,
+      "fraction": 5.541548631680812e-07
+    },
+    {
+      "function": "<std::sys::pal::unix::thread::Thread as core::ops::drop::Drop>::drop",
+      "self_instructions": 20,
+      "fraction": 5.277665363505535e-07
+    },
+    {
+      "function": "0x0000000000002290",
+      "self_instructions": 20,
+      "fraction": 5.277665363505535e-07
+    },
+    {
+      "function": "0x00000000000184e0",
+      "self_instructions": 20,
+      "fraction": 5.277665363505535e-07
+    },
+    {
+      "function": "0x0000000000022f00",
+      "self_instructions": 20,
+      "fraction": 5.277665363505535e-07
+    },
+    {
+      "function": "0x0000000000003510",
+      "self_instructions": 20,
+      "fraction": 5.277665363505535e-07
+    },
+    {
+      "function": "clock_gettime",
+      "self_instructions": 20,
+      "fraction": 5.277665363505535e-07
+    },
+    {
+      "function": "strncmp",
+      "self_instructions": 20,
+      "fraction": 5.277665363505535e-07
+    },
+    {
+      "function": "strncasecmp_l",
+      "self_instructions": 20,
+      "fraction": 5.277665363505535e-07
+    },
+    {
+      "function": "strcasecmp_l",
+      "self_instructions": 20,
+      "fraction": 5.277665363505535e-07
+    },
+    {
+      "function": "strncasecmp",
+      "self_instructions": 20,
+      "fraction": 5.277665363505535e-07
+    },
+    {
+      "function": "0x0000000000164a00",
+      "self_instructions": 20,
+      "fraction": 5.277665363505535e-07
+    },
+    {
+      "function": "strcasecmp",
+      "self_instructions": 20,
+      "fraction": 5.277665363505535e-07
+    },
+    {
+      "function": "_IO_file_read",
+      "self_instructions": 20,
+      "fraction": 5.277665363505535e-07
+    },
+    {
+      "function": "<std::io::buffered::bufwriter::BufWriter<W> as core::ops::drop::Drop>::drop",
+      "self_instructions": 19,
+      "fraction": 5.013782095330258e-07
+    },
+    {
+      "function": "0x00000000049a73d0",
+      "self_instructions": 19,
+      "fraction": 5.013782095330258e-07
+    },
+    {
+      "function": "0x00000000000238e0",
+      "self_instructions": 18,
+      "fraction": 4.7498988271549814e-07
+    },
+    {
+      "function": "0x0000000000012300",
+      "self_instructions": 18,
+      "fraction": 4.7498988271549814e-07
+    },
+    {
+      "function": "stpncpy",
+      "self_instructions": 18,
+      "fraction": 4.7498988271549814e-07
+    },
+    {
+      "function": "wcslen",
+      "self_instructions": 18,
+      "fraction": 4.7498988271549814e-07
+    },
+    {
+      "function": "strncpy",
+      "self_instructions": 18,
+      "fraction": 4.7498988271549814e-07
+    },
+    {
+      "function": "strcmp",
+      "self_instructions": 18,
+      "fraction": 4.7498988271549814e-07
+    },
+    {
+      "function": "wcsnlen",
+      "self_instructions": 18,
+      "fraction": 4.7498988271549814e-07
+    },
+    {
+      "function": "getrlimit",
+      "self_instructions": 18,
+      "fraction": 4.7498988271549814e-07
+    },
+    {
+      "function": "index",
+      "self_instructions": 18,
+      "fraction": 4.7498988271549814e-07
+    },
+    {
+      "function": "wcpncpy",
+      "self_instructions": 17,
+      "fraction": 4.486015558979705e-07
+    },
+    {
+      "function": "wcscat",
+      "self_instructions": 17,
+      "fraction": 4.486015558979705e-07
+    },
+    {
+      "function": "wcsncpy",
+      "self_instructions": 17,
+      "fraction": 4.486015558979705e-07
+    },
+    {
+      "function": "0x00000000000435a0",
+      "self_instructions": 17,
+      "fraction": 4.486015558979705e-07
+    },
+    {
+      "function": "std::sys::pal::unix::weak::DlsymWeak<F>::initialize",
+      "self_instructions": 16,
+      "fraction": 4.222132290804428e-07
+    },
+    {
+      "function": "crossbeam_epoch::collector::Collector::register",
+      "self_instructions": 16,
+      "fraction": 4.222132290804428e-07
+    },
+    {
+      "function": "0x0000000000013010",
+      "self_instructions": 16,
+      "fraction": 4.222132290804428e-07
+    },
+    {
+      "function": "0x00000000000034e0",
+      "self_instructions": 16,
+      "fraction": 4.222132290804428e-07
+    },
+    {
+      "function": "strcpy",
+      "self_instructions": 16,
+      "fraction": 4.222132290804428e-07
+    },
+    {
+      "function": "__default_morecore",
+      "self_instructions": 16,
+      "fraction": 4.222132290804428e-07
+    },
+    {
+      "function": "pthread_attr_getguardsize",
+      "self_instructions": 16,
+      "fraction": 4.222132290804428e-07
+    },
+    {
+      "function": "brk",
+      "self_instructions": 16,
+      "fraction": 4.222132290804428e-07
+    },
+    {
+      "function": "stpcpy",
+      "self_instructions": 16,
+      "fraction": 4.222132290804428e-07
+    },
+    {
+      "function": "strcat",
+      "self_instructions": 16,
+      "fraction": 4.222132290804428e-07
+    },
+    {
+      "function": "main",
+      "self_instructions": 15,
+      "fraction": 3.958249022629151e-07
+    },
+    {
+      "function": "0x000000000001d2c0",
+      "self_instructions": 15,
+      "fraction": 3.958249022629151e-07
+    },
+    {
+      "function": "0x0000000000110510",
+      "self_instructions": 15,
+      "fraction": 3.958249022629151e-07
+    },
+    {
+      "function": "wcscpy",
+      "self_instructions": 15,
+      "fraction": 3.958249022629151e-07
+    },
+    {
+      "function": "_IO_default_finish",
+      "self_instructions": 15,
+      "fraction": 3.958249022629151e-07
+    },
+    {
+      "function": "pthread_key_delete",
+      "self_instructions": 15,
+      "fraction": 3.958249022629151e-07
+    },
+    {
+      "function": "std::sys::thread_local::native::eager::destroy",
+      "self_instructions": 14,
+      "fraction": 3.6943657544538747e-07
+    },
+    {
+      "function": "core::ptr::drop_in_place<rayon_core::ThreadPoolBuildError>",
+      "self_instructions": 14,
+      "fraction": 3.6943657544538747e-07
+    },
+    {
+      "function": "0x000000000001d3c0",
+      "self_instructions": 14,
+      "fraction": 3.6943657544538747e-07
+    },
+    {
+      "function": "0x0000000000013000",
+      "self_instructions": 14,
+      "fraction": 3.6943657544538747e-07
+    },
+    {
+      "function": "0x0000000000022710",
+      "self_instructions": 14,
+      "fraction": 3.6943657544538747e-07
+    },
+    {
+      "function": "__rust_dealloc",
+      "self_instructions": 13,
+      "fraction": 3.4304824862785977e-07
+    },
+    {
+      "function": "0x000000000005e1c0",
+      "self_instructions": 13,
+      "fraction": 3.4304824862785977e-07
+    },
+    {
+      "function": "0x00000000000056f0",
+      "self_instructions": 13,
+      "fraction": 3.4304824862785977e-07
+    },
+    {
+      "function": "0x00000000000010c0",
+      "self_instructions": 13,
+      "fraction": 3.4304824862785977e-07
+    },
+    {
+      "function": "0x0000000000011360",
+      "self_instructions": 13,
+      "fraction": 3.4304824862785977e-07
+    },
+    {
+      "function": "<matrix_calc::accelerated::SimdBackend as core::fmt::Display>::fmt",
+      "self_instructions": 12,
+      "fraction": 3.1665992181033213e-07
+    },
+    {
+      "function": "0x000000000005e200",
+      "self_instructions": 12,
+      "fraction": 3.1665992181033213e-07
+    },
+    {
+      "function": "rayon_core::current_num_threads",
+      "self_instructions": 12,
+      "fraction": 3.1665992181033213e-07
+    },
+    {
+      "function": "0x0000000000004c10",
+      "self_instructions": 12,
+      "fraction": 3.1665992181033213e-07
+    },
+    {
+      "function": "0x0000000000022ed0",
+      "self_instructions": 12,
+      "fraction": 3.1665992181033213e-07
+    },
+    {
+      "function": "_IO_file_finish",
+      "self_instructions": 12,
+      "fraction": 3.1665992181033213e-07
+    },
+    {
+      "function": "pthread_self",
+      "self_instructions": 12,
+      "fraction": 3.1665992181033213e-07
+    },
+    {
+      "function": "0x0000000000001100",
+      "self_instructions": 12,
+      "fraction": 3.1665992181033213e-07
+    },
+    {
+      "function": "0x0000000000005730",
+      "self_instructions": 12,
+      "fraction": 3.1665992181033213e-07
+    },
+    {
+      "function": "0x00000000000113a0",
+      "self_instructions": 12,
+      "fraction": 3.1665992181033213e-07
+    },
+    {
+      "function": "(below main)",
+      "self_instructions": 11,
+      "fraction": 2.9027159499280444e-07
+    },
+    {
+      "function": "matrix_calc::accelerated::simd_backend",
+      "self_instructions": 11,
+      "fraction": 2.9027159499280444e-07
+    },
+    {
+      "function": "0x0000000000015260",
+      "self_instructions": 11,
+      "fraction": 2.9027159499280444e-07
+    },
+    {
+      "function": "0x0000000000011910",
+      "self_instructions": 11,
+      "fraction": 2.9027159499280444e-07
+    },
+    {
+      "function": "0x0000000000029a90",
+      "self_instructions": 11,
+      "fraction": 2.9027159499280444e-07
+    },
+    {
+      "function": "0x000000000001db20",
+      "self_instructions": 10,
+      "fraction": 2.6388326817527674e-07
+    },
+    {
+      "function": "_setjmp",
+      "self_instructions": 10,
+      "fraction": 2.6388326817527674e-07
+    },
+    {
+      "function": "0x000000000001af80",
+      "self_instructions": 9,
+      "fraction": 2.3749494135774907e-07
+    },
+    {
+      "function": "poll",
+      "self_instructions": 9,
+      "fraction": 2.3749494135774907e-07
+    },
+    {
+      "function": "0x000000000008f050",
+      "self_instructions": 9,
+      "fraction": 2.3749494135774907e-07
+    },
+    {
+      "function": "0x0000000000004560",
+      "self_instructions": 9,
+      "fraction": 2.3749494135774907e-07
+    },
+    {
+      "function": "<alloc::string::String as core::fmt::Display>::fmt",
+      "self_instructions": 8,
+      "fraction": 2.111066145402214e-07
+    },
+    {
+      "function": "core::core_arch::x86::xsave::_xgetbv",
+      "self_instructions": 8,
+      "fraction": 2.111066145402214e-07
+    },
+    {
+      "function": "<str as core::fmt::Display>::fmt",
+      "self_instructions": 8,
+      "fraction": 2.111066145402214e-07
+    },
+    {
+      "function": "core::fmt::Formatter::write_str",
+      "self_instructions": 8,
+      "fraction": 2.111066145402214e-07
+    },
+    {
+      "function": "0x000000000000bde0",
+      "self_instructions": 8,
+      "fraction": 2.111066145402214e-07
+    },
+    {
+      "function": "0x0000000000022c30",
+      "self_instructions": 8,
+      "fraction": 2.111066145402214e-07
+    },
+    {
+      "function": "0x0000000000089ad0",
+      "self_instructions": 8,
+      "fraction": 2.111066145402214e-07
+    },
+    {
+      "function": "_IO_unsave_markers",
+      "self_instructions": 8,
+      "fraction": 2.111066145402214e-07
+    },
+    {
+      "function": "sin",
+      "self_instructions": 8,
+      "fraction": 2.111066145402214e-07
+    },
+    {
+      "function": "logf",
+      "self_instructions": 8,
+      "fraction": 2.111066145402214e-07
+    },
+    {
+      "function": "__sinh_finite",
+      "self_instructions": 8,
+      "fraction": 2.111066145402214e-07
+    },
+    {
+      "function": "powf",
+      "self_instructions": 8,
+      "fraction": 2.111066145402214e-07
+    },
+    {
+      "function": "tan",
+      "self_instructions": 8,
+      "fraction": 2.111066145402214e-07
+    },
+    {
+      "function": "__atanh_finite",
+      "self_instructions": 8,
+      "fraction": 2.111066145402214e-07
+    },
+    {
+      "function": "expf",
+      "self_instructions": 8,
+      "fraction": 2.111066145402214e-07
+    },
+    {
+      "function": "log2f",
+      "self_instructions": 8,
+      "fraction": 2.111066145402214e-07
+    },
+    {
+      "function": "__atan2_finite",
+      "self_instructions": 8,
+      "fraction": 2.111066145402214e-07
+    },
+    {
+      "function": "cosf",
+      "self_instructions": 8,
+      "fraction": 2.111066145402214e-07
+    },
+    {
+      "function": "cos",
+      "self_instructions": 8,
+      "fraction": 2.111066145402214e-07
+    },
+    {
+      "function": "0x000000000005b3b0",
+      "self_instructions": 8,
+      "fraction": 2.111066145402214e-07
+    },
+    {
+      "function": "atan",
+      "self_instructions": 8,
+      "fraction": 2.111066145402214e-07
+    },
+    {
+      "function": "expm1",
+      "self_instructions": 8,
+      "fraction": 2.111066145402214e-07
+    },
+    {
+      "function": "log2",
+      "self_instructions": 8,
+      "fraction": 2.111066145402214e-07
+    },
+    {
+      "function": "sinf",
+      "self_instructions": 8,
+      "fraction": 2.111066145402214e-07
+    },
+    {
+      "function": "exp2f",
+      "self_instructions": 8,
+      "fraction": 2.111066145402214e-07
+    },
+    {
+      "function": "__exp_finite",
+      "self_instructions": 8,
+      "fraction": 2.111066145402214e-07
+    },
+    {
+      "function": "sincosf",
+      "self_instructions": 8,
+      "fraction": 2.111066145402214e-07
+    },
+    {
+      "function": "__log_finite",
+      "self_instructions": 8,
+      "fraction": 2.111066145402214e-07
+    },
+    {
+      "function": "std::sys::pal::unix::args::imp::ARGV_INIT_ARRAY::init_wrapper",
+      "self_instructions": 7,
+      "fraction": 1.8471828772269373e-07
+    },
+    {
+      "function": "std::rt::lang_start::{{closure}}",
+      "self_instructions": 7,
+      "fraction": 1.8471828772269373e-07
+    },
+    {
+      "function": "0x0000000000021f30",
+      "self_instructions": 7,
+      "fraction": 1.8471828772269373e-07
+    },
+    {
+      "function": "sincos",
+      "self_instructions": 7,
+      "fraction": 1.8471828772269373e-07
+    },
+    {
+      "function": "__asin_finite",
+      "self_instructions": 7,
+      "fraction": 1.8471828772269373e-07
+    },
+    {
+      "function": "__acos_finite",
+      "self_instructions": 7,
+      "fraction": 1.8471828772269373e-07
+    },
+    {
+      "function": "__pow_finite",
+      "self_instructions": 7,
+      "fraction": 1.8471828772269373e-07
+    },
+    {
+      "function": "0x00000000048a0000",
+      "self_instructions": 6,
+      "fraction": 1.5832996090516607e-07
+    },
+    {
+      "function": "0x0000000004866000",
+      "self_instructions": 6,
+      "fraction": 1.5832996090516607e-07
+    },
+    {
+      "function": "0x0000000000159000",
+      "self_instructions": 6,
+      "fraction": 1.5832996090516607e-07
+    },
+    {
+      "function": "0x000000000483b000",
+      "self_instructions": 6,
+      "fraction": 1.5832996090516607e-07
+    },
+    {
+      "function": "strspn",
+      "self_instructions": 6,
+      "fraction": 1.5832996090516607e-07
+    },
+    {
+      "function": "strpbrk",
+      "self_instructions": 6,
+      "fraction": 1.5832996090516607e-07
+    },
+    {
+      "function": "strcspn",
+      "self_instructions": 6,
+      "fraction": 1.5832996090516607e-07
+    },
+    {
+      "function": "ceil",
+      "self_instructions": 6,
+      "fraction": 1.5832996090516607e-07
+    },
+    {
+      "function": "roundeven",
+      "self_instructions": 6,
+      "fraction": 1.5832996090516607e-07
+    },
+    {
+      "function": "floor",
+      "self_instructions": 6,
+      "fraction": 1.5832996090516607e-07
+    },
+    {
+      "function": "0x000000000005e150",
+      "self_instructions": 5,
+      "fraction": 1.3194163408763837e-07
+    },
+    {
+      "function": "__rust_alloc_zeroed",
+      "self_instructions": 5,
+      "fraction": 1.3194163408763837e-07
+    },
+    {
+      "function": "std::time::Instant::now",
+      "self_instructions": 5,
+      "fraction": 1.3194163408763837e-07
+    },
+    {
+      "function": "0x00000000000123f0",
+      "self_instructions": 5,
+      "fraction": 1.3194163408763837e-07
+    },
+    {
+      "function": "0x00000000000230b0",
+      "self_instructions": 5,
+      "fraction": 1.3194163408763837e-07
+    },
+    {
+      "function": "0x0000000000017e50",
+      "self_instructions": 5,
+      "fraction": 1.3194163408763837e-07
+    },
+    {
+      "function": "__close_nocancel",
+      "self_instructions": 5,
+      "fraction": 1.3194163408763837e-07
+    },
+    {
+      "function": "fstat",
+      "self_instructions": 5,
+      "fraction": 1.3194163408763837e-07
+    },
+    {
+      "function": "exit",
+      "self_instructions": 5,
+      "fraction": 1.3194163408763837e-07
+    },
+    {
+      "function": "0x0000000000001050",
+      "self_instructions": 5,
+      "fraction": 1.3194163408763837e-07
+    },
+    {
+      "function": "0x0000000000005680",
+      "self_instructions": 5,
+      "fraction": 1.3194163408763837e-07
+    },
+    {
+      "function": "fma",
+      "self_instructions": 5,
+      "fraction": 1.3194163408763837e-07
+    },
+    {
+      "function": "0x00000000000112f0",
+      "self_instructions": 5,
+      "fraction": 1.3194163408763837e-07
+    },
+    {
+      "function": "fmaf",
+      "self_instructions": 5,
+      "fraction": 1.3194163408763837e-07
+    },
+    {
+      "function": "_dl_audit_preinit",
+      "self_instructions": 4,
+      "fraction": 1.055533072701107e-07
+    },
+    {
+      "function": "0x00000000049a73d8",
+      "self_instructions": 3,
+      "fraction": 7.916498045258303e-08
+    },
+    {
+      "function": "0x0000000004888f98",
+      "self_instructions": 3,
+      "fraction": 7.916498045258303e-08
+    },
+    {
+      "function": "0x000000000483b284",
+      "self_instructions": 3,
+      "fraction": 7.916498045258303e-08
+    },
+    {
+      "function": "0x000000000491cdc8",
+      "self_instructions": 3,
+      "fraction": 7.916498045258303e-08
+    },
+    {
+      "function": "0x0000000000370ed0",
+      "self_instructions": 3,
+      "fraction": 7.916498045258303e-08
+    },
+    {
+      "function": "_Exit",
+      "self_instructions": 3,
+      "fraction": 7.916498045258303e-08
+    },
+    {
+      "function": "_dl_debug_state",
+      "self_instructions": 2,
+      "fraction": 5.277665363505535e-08
+    },
+    {
+      "function": "_IO_file_close",
+      "self_instructions": 2,
+      "fraction": 5.277665363505535e-08
+    },
+    {
+      "function": "_IO_file_stat",
+      "self_instructions": 2,
+      "fraction": 5.277665363505535e-08
+    },
+    {
+      "function": "0x000000000001ccd0",
+      "self_instructions": 1,
+      "fraction": 2.6388326817527675e-08
+    },
+    {
+      "function": "0x0000000000159050",
+      "self_instructions": 1,
+      "fraction": 2.6388326817527675e-08
+    },
+    {
+      "function": "0x00000000048663b0",
+      "self_instructions": 1,
+      "fraction": 2.6388326817527675e-08
+    },
+    {
+      "function": "0x000000000483b030",
+      "self_instructions": 1,
+      "fraction": 2.6388326817527675e-08
+    },
+    {
+      "function": "0x00000000048a0280",
+      "self_instructions": 1,
+      "fraction": 2.6388326817527675e-08
+    }
+  ]
+}
